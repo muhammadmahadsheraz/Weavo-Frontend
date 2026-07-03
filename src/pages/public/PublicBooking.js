@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../api/api';
 import WeavoThreads from '../../components/WeavoThreads';
+import ChatWidget from '../../components/ChatWidget';
 
 const STEPS = ['Service', 'Date & Time', 'Your Details', 'Confirm'];
 
@@ -276,6 +277,7 @@ const PublicBooking = () => {
           </div>
         </div>
       </div>
+      <ChatWidget slug={slug} businessName={biz.name} services={services} />
     </div>
   );
 };
