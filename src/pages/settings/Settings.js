@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../api/api';
+import CalendarIntegration from '../../components/CalendarIntegration';
 
 const Settings = () => {
   const { user, logout } = useAuth();
   const navigate         = useNavigate();
+  const [searchParams]   = useSearchParams();
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const cal = searchParams.get('calendar');
+    if (cal === 'connected') toast.success('Calendar connected successfully!');
+    else if (cal === 'error') toast.error('Failed to connect calendar. Please try again.');
+  }, [searchParams]);
 
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
 
@@ -114,6 +122,15 @@ const Settings = () => {
             Logout
           </button>
         </div>
+      </div>
+
+      {/* Calendar Integration */}
+      <div className="glass p-6 space-y-4">
+        <h3 className="text-sm font-semibold text-white">Calendar Integration</h3>
+        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          Connect your calendars to automatically sync appointments and prevent double bookings.
+        </p>
+        <CalendarIntegration />
       </div>
 
       {/* App info */}
