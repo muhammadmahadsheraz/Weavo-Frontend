@@ -22,6 +22,7 @@ import ServiceForm     from './pages/service/ServiceForm';
 import Staff           from './pages/staff/Staff';
 import Settings        from './pages/settings/Settings';
 import PublicBooking   from './pages/public/PublicBooking';
+import OAuthCallback   from './pages/auth/OAuthCallback';
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen" style={{ background: '#050709' }}>
@@ -37,6 +38,7 @@ function AppRoutes() {
     <Routes>
       {/* Public booking — no auth, no layout wrapper */}
       <Route path="/book/:slug" element={<PublicBooking />} />
+      <Route path="/auth/callback" element={<OAuthCallback />} />
 
       {/* Auth */}
       <Route element={<AuthLayout />}>

@@ -24,7 +24,20 @@ const CalendarIntegration = () => {
   const handleGoogleConnect = async (businessId) => {
     try {
       const res = await api.post('/calendar/google/auth', { businessId });
-      window.open(res.data.url, '_blank', 'width=600,height=700');
+      const popup = window.open(res.data.url, '_blank', 'width=600,height=700');
+
+      const handleMessage = (event) => {
+        if (event.data?.type !== 'OAUTH_CALLBACK') return;
+        window.removeEventListener('message', handleMessage);
+        if (event.data.status === 'connected') {
+          toast.success('Calendar connected successfully!');
+        } else {
+          toast.error('Failed to connect calendar. Please try again.');
+        }
+        fetchProviders();
+      };
+
+      window.addEventListener('message', handleMessage);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to connect Google Calendar');
     }

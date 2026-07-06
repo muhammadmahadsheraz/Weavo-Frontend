@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api/api';
 import CalendarIntegration from '../../components/CalendarIntegration';
 
 const Settings = () => {
   const { user, logout } = useAuth();
   const navigate         = useNavigate();
-  const [searchParams]   = useSearchParams();
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    const cal = searchParams.get('calendar');
-    if (cal === 'connected') toast.success('Calendar connected successfully!');
-    else if (cal === 'error') toast.error('Failed to connect calendar. Please try again.');
-  }, [searchParams]);
 
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
 
