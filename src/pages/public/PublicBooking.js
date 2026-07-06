@@ -83,12 +83,12 @@ const PublicBooking = () => {
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
           </svg>
         </div>
-        <h2 className="text-2xl font-bold text-white mb-2">Booking confirmed!</h2>
+        <h2 className="text-2xl font-bold text-white mb-2">Booking request submitted!</h2>
         <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Your appointment at <strong className="text-white">{biz.name}</strong> is pending confirmation.
+          Your appointment at <strong className="text-white">{biz.name}</strong> is pending confirmation from the business.
         </p>
         <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          A confirmation email has been sent to <span style={{ color: '#a78bfa' }}>{form.client.email}</span>.
+          You'll receive an email once it's confirmed.
         </p>
       </div>
     </div>
