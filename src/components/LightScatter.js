@@ -7,7 +7,7 @@ export default function LightScatter() {
     const el = moteRef.current;
     if (!el) return;
     const frag = document.createDocumentFragment();
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 90; i++) {
       const m = document.createElement('div');
       const size = Math.random() * 1.8 + 0.4;
       const left = Math.random() * 100;
@@ -45,11 +45,11 @@ export default function LightScatter() {
       }} />
 
       <div style={{
-        position: 'absolute', top: '-30vmax', left: '50%',
-        width: '100vmax', height: '90vmax',
+        position: 'absolute', top: '-40vmax', left: '50%',
+        width: '140vmax', height: '120vmax',
         transform: 'translateX(-50%)',
-        background: 'radial-gradient(ellipse 40% 25% at 50% 0%, rgba(200,190,240,0.15) 0%, rgba(140,120,200,0.06) 40%, transparent 65%)',
-        filter: 'blur(50px)', mixBlendMode: 'screen',
+        background: 'radial-gradient(ellipse 50% 30% at 50% 0%, rgba(210,200,245,0.20) 0%, rgba(160,145,220,0.10) 35%, rgba(120,100,190,0.04) 55%, transparent 72%)',
+        filter: 'blur(55px)', mixBlendMode: 'screen',
         animation: 'breathe 12s ease-in-out infinite',
       }} />
       <style>{`@keyframes breathe { 0%,100% { opacity: 0.8; } 50% { opacity: 1; } }`}</style>
