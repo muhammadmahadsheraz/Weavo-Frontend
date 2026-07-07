@@ -19,7 +19,7 @@ export default function LightScatter() {
 
       Object.assign(m.style, {
         position: 'absolute', borderRadius: '50%',
-        background: '#d4c4ff', width: `${size}px`, height: `${size}px`,
+        background: '#a78bfa', width: `${size}px`, height: `${size}px`,
         left: `${left}%`, bottom: `${Math.random() * 20 - 10}%`,
         opacity: '0', filter: 'blur(0.4px)',
         animation: `moteDrift ${dur1}s linear infinite, moteGlow ${dur2}s ease-in-out infinite`,
@@ -54,7 +54,7 @@ export default function LightScatter() {
         position: 'absolute', top: '-34vmax', left: '50%',
         width: '130vmax', height: '110vmax',
         transform: 'translateX(-50%)',
-        background: 'radial-gradient(ellipse 46% 32% at 50% 0%, rgba(180,160,245,0.30) 0%, rgba(124,58,237,0.14) 28%, rgba(80,50,160,0.06) 50%, transparent 72%)',
+        background: 'radial-gradient(ellipse 46% 32% at 50% 0%, rgba(124,58,237,0.28) 0%, rgba(124,58,237,0.14) 28%, rgba(80,40,170,0.06) 50%, transparent 72%)',
         filter: 'blur(42px)', mixBlendMode: 'screen',
         animation: 'ambientBreathe 10s ease-in-out infinite',
       }} />
@@ -65,7 +65,7 @@ export default function LightScatter() {
         width: '220vmax', height: '220vmax',
         transformOrigin: '50% 0%',
         transform: 'translateX(-50%)',
-        background: 'repeating-conic-gradient(from 152deg at 50% 0%, rgba(200,185,255,0.25) 0deg, rgba(200,185,255,0.04) 2.5deg, rgba(200,185,255,0.18) 5deg, rgba(200,185,255,0.02) 8deg, rgba(200,185,255,0.22) 11deg, rgba(200,185,255,0.03) 14deg, rgba(200,185,255,0.14) 17deg, rgba(200,185,255,0.02) 21deg, rgba(200,185,255,0.20) 25deg, rgba(200,185,255,0.03) 30deg, rgba(200,185,255,0.16) 34deg, rgba(200,185,255,0.02) 38deg, transparent 38.01deg, transparent 360deg)',
+        background: 'repeating-conic-gradient(from 152deg at 50% 0%, rgba(124,58,237,0.22) 0deg, rgba(124,58,237,0.03) 2.5deg, rgba(124,58,237,0.16) 5deg, rgba(124,58,237,0.02) 8deg, rgba(124,58,237,0.20) 11deg, rgba(124,58,237,0.03) 14deg, rgba(124,58,237,0.12) 17deg, rgba(124,58,237,0.02) 21deg, rgba(124,58,237,0.18) 25deg, rgba(124,58,237,0.03) 30deg, rgba(124,58,237,0.14) 34deg, rgba(124,58,237,0.02) 38deg, transparent 38.01deg, transparent 360deg)',
         WebkitMaskImage: 'radial-gradient(circle at 50% 0%, black 0%, black 22%, rgba(0,0,0,0.7) 45%, transparent 78%)',
         maskImage: 'radial-gradient(circle at 50% 0%, black 0%, black 22%, rgba(0,0,0,0.7) 45%, transparent 78%)',
         filter: 'blur(11px)', mixBlendMode: 'screen',
@@ -78,7 +78,7 @@ export default function LightScatter() {
         width: '220vmax', height: '220vmax',
         transformOrigin: '50% 0%',
         transform: 'translateX(-50%)',
-        background: 'repeating-conic-gradient(from 158deg at 50% 0%, transparent 0deg, rgba(180,160,245,0.09) 3deg, transparent 6.5deg, transparent 10deg, rgba(180,160,245,0.12) 13deg, transparent 16.5deg, transparent 21deg, rgba(180,160,245,0.08) 24deg, transparent 28deg, transparent 32.01deg, transparent 360deg)',
+        background: 'repeating-conic-gradient(from 158deg at 50% 0%, transparent 0deg, rgba(124,58,237,0.08) 3deg, transparent 6.5deg, transparent 10deg, rgba(6,182,212,0.08) 13deg, transparent 16.5deg, transparent 21deg, rgba(124,58,237,0.07) 24deg, transparent 28deg, transparent 32.01deg, transparent 360deg)',
         WebkitMaskImage: 'radial-gradient(circle at 50% 0%, black 0%, black 18%, rgba(0,0,0,0.6) 42%, transparent 72%)',
         maskImage: 'radial-gradient(circle at 50% 0%, black 0%, black 18%, rgba(0,0,0,0.6) 42%, transparent 72%)',
         filter: 'blur(13px)', mixBlendMode: 'screen', opacity: 0.8,
@@ -90,7 +90,7 @@ export default function LightScatter() {
         position: 'absolute', top: '-16vmax', left: '50%',
         width: '70vmax', height: '20vmax',
         transform: 'translateX(-50%)',
-        background: 'radial-gradient(ellipse 55% 45% at 50% 100%, rgba(210,195,255,0.28) 0%, rgba(160,140,240,0.12) 45%, transparent 78%)',
+        background: 'radial-gradient(ellipse 55% 45% at 50% 100%, rgba(124,58,237,0.26) 0%, rgba(6,182,212,0.10) 45%, transparent 78%)',
         filter: 'blur(24px)', mixBlendMode: 'screen',
         animation: 'surfaceFlicker 4.5s ease-in-out infinite',
       }} />
