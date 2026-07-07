@@ -22,6 +22,7 @@ import ServiceForm     from './pages/service/ServiceForm';
 import Staff           from './pages/staff/Staff';
 import Settings        from './pages/settings/Settings';
 import PublicBooking   from './pages/public/PublicBooking';
+import Browse          from './pages/public/Browse';
 import OAuthCallback   from './pages/auth/OAuthCallback';
 
 const PageLoader = () => (
@@ -36,7 +37,8 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public booking — no auth, no layout wrapper */}
+      {/* Public */}
+      <Route path="/browse" element={<Browse />} />
       <Route path="/book/:slug" element={<PublicBooking />} />
       <Route path="/auth/callback" element={<OAuthCallback />} />
 
@@ -48,8 +50,8 @@ function AppRoutes() {
         <Route path="/reset-password"  element={<ResetPassword />} />
       </Route>
 
-      {/* Dashboard */}
-      <Route path="/" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+      {/* Root — Dashboard for authed users, redirects to /browse for guests */}
+      <Route path="/" element={user ? <DashboardLayout /> : <Navigate to="/browse" replace />}>
         <Route index                    element={<Dashboard />} />
         <Route path="analytics"         element={<Analytics />} />
         <Route path="businesses"        element={<Businesses />} />
@@ -64,15 +66,9 @@ function AppRoutes() {
         <Route path="settings"          element={<Settings />} />
       </Route>
 
-      <Route path="*" element={<Navigate to={user ? '/' : '/login'} replace />} />
+      <Route path="*" element={<Navigate to={user ? '/' : '/browse'} replace />} />
     </Routes>
   );
-}
-
-function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) return <PageLoader />;
-  return user ? children : <Navigate to="/login" replace />;
 }
 
 function App() {

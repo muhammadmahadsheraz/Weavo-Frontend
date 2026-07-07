@@ -46,6 +46,11 @@ const ManageBooking = ({ slug, onBack }) => {
   const [rescheduleSlotsLoading, setRescheduleSlotsLoading] = useState(false);
   const [resolved, setResolved] = useState(false);
   const [emailErr, setEmailErr] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpErr, setOtpErr] = useState('');
+  const [token, setToken] = useState('');
 
   const validateEmail = (val) => {
     if (!val.trim()) return 'Email is required';
@@ -53,20 +58,54 @@ const ManageBooking = ({ slug, onBack }) => {
     return '';
   };
 
-  const handleLookup = async () => {
+  const handleSendOtp = async () => {
     const err = validateEmail(email);
     setEmailErr(err);
     if (err) return;
-    setLoading(true);
-    setLookedUp(false);
+    setOtpLoading(true);
     try {
-      const { data } = await api.get(`/public/book/${slug}/lookup`, { params: { email } });
-      setAppointments(data.appointments);
-    } catch {
-      toast.error('Failed to look up appointments');
+      await api.post('/public/send-otp', { email });
+      setOtpSent(true);
+      setOtpErr('');
+      toast.success('Verification code sent!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to send code');
     } finally {
-      setLoading(false);
-      setLookedUp(true);
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode.trim() || otpCode.length !== 6) {
+      setOtpErr('Enter the 6-digit code');
+      return;
+    }
+    setOtpLoading(true);
+    try {
+      const { data } = await api.post('/public/verify-otp', { email, code: otpCode });
+      setToken(data.token);
+      setOtpErr('');
+      // Now fetch appointments
+      setLoading(true);
+      try {
+        const res = await api.get(`/public/book/${slug}/lookup`, {
+          params: { email },
+          headers: { Authorization: `Bearer ${data.token}` }
+        });
+        setAppointments(res.data.appointments);
+        setLookedUp(true);
+      } catch {
+        toast.error('Failed to look up appointments');
+        setLookedUp(true);
+      } finally {
+        setLoading(false);
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Invalid code';
+      setOtpErr(msg);
+      if (msg.includes('Too many')) setOtpSent(false);
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -138,7 +177,7 @@ const ManageBooking = ({ slug, onBack }) => {
 
   if (action === 'reschedule' && actionApt) return (
     <div className="space-y-5">
-        <h3 className="text-base font-semibold text-white">Reschedule</h3>
+      <h3 className="text-base font-semibold text-white">Reschedule</h3>
       <div>
         <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>New Date</label>
         <DateInput value={rescheduleDate}
@@ -201,43 +240,71 @@ const ManageBooking = ({ slug, onBack }) => {
   return (
     <div>
       <h3 className="text-base font-semibold text-white mb-4">Manage My Booking</h3>
-      {!lookedUp ? (
+      {!token ? (
         <div>
           <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>
-            Enter the email you used when booking to see your appointments.
+            Verify your email to access your bookings. We'll send a one-time code.
           </p>
           <div>
             <div className="flex gap-2">
               <input type="email" value={email} onChange={e => { setEmail(e.target.value); setEmailErr(''); }}
                      placeholder="you@email.com"
                      onBlur={() => setEmailErr(validateEmail(email))}
-                     onKeyDown={e => e.key === 'Enter' && handleLookup()}
+                     onKeyDown={e => e.key === 'Enter' && !otpSent && handleSendOtp()}
+                     disabled={otpSent}
                      className="input-dark flex-1"
                      style={emailErr ? { borderColor: '#f87171' } : {}} />
-              <button onClick={handleLookup} disabled={!email || loading}
-                      className="btn-primary" style={{ padding: '9px 18px', fontSize: 13 }}>
-                {loading ? '...' : 'Look up'}
-              </button>
+              {!otpSent ? (
+                <button onClick={handleSendOtp} disabled={!email || otpLoading}
+                        className="btn-primary" style={{ padding: '9px 18px', fontSize: 13, whiteSpace: 'nowrap' }}>
+                  {otpLoading ? 'Sending...' : 'Send Code'}
+                </button>
+              ) : null}
             </div>
             <ErrMsg msg={emailErr} />
           </div>
+
+          {otpSent && (
+            <div className="mt-4">
+              <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                Enter the 6-digit code sent to <strong style={{ color: 'rgba(255,255,255,0.7)' }}>{email}</strong>
+              </p>
+              <div className="flex gap-2">
+                <input type="text" value={otpCode} onChange={e => { setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setOtpErr(''); }}
+                       placeholder="000000" maxLength={6}
+                       onKeyDown={e => e.key === 'Enter' && handleVerifyOtp()}
+                       className="input-dark flex-1 text-center tracking-widest"
+                       style={{ fontSize: 18, letterSpacing: 8, ...(otpErr ? { borderColor: '#f87171' } : {}) }} />
+                <button onClick={handleVerifyOtp} disabled={otpCode.length !== 6 || otpLoading}
+                        className="btn-primary" style={{ padding: '9px 18px', fontSize: 13, whiteSpace: 'nowrap' }}>
+                  {otpLoading ? '...' : 'Verify'}
+                </button>
+              </div>
+              <ErrMsg msg={otpErr} />
+              <button onClick={() => { setOtpSent(false); setOtpCode(''); setOtpErr(''); }}
+                      className="text-xs mt-2" style={{ color: '#a78bfa', cursor: 'pointer', background: 'none', border: 'none' }}>
+                Change email or resend code
+              </button>
+            </div>
+          )}
+
           <button onClick={onBack} className="btn-ghost mt-3 text-xs">← Back to booking</button>
         </div>
-      ) : appointments.length === 0 ? (
+      ) : lookedUp && appointments.length === 0 ? (
         <div className="text-center py-4">
           <p className="text-sm text-white mb-1">No upcoming appointments found</p>
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Check the email or book a new appointment.</p>
-          <button onClick={() => setLookedUp(false)} className="btn-ghost mt-3 text-xs">Try another email</button>
-          <button onClick={onBack} className="btn-ghost mt-1 text-xs">← Back to booking</button>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Bookings with this email will appear here.</p>
+          <button onClick={onBack} className="btn-ghost mt-3 text-xs">← Back to booking</button>
         </div>
-      ) : (
+      ) : lookedUp ? (
         <div className="space-y-3">
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
               {appointments.length} appointment{appointments.length > 1 ? 's' : ''} found
             </p>
-            <button onClick={() => setLookedUp(false)} className="text-xs" style={{ color: '#a78bfa', cursor: 'pointer', background: 'none', border: 'none' }}>
-              Change email
+            <button onClick={() => { setToken(''); setOtpSent(false); setOtpCode(''); setLookedUp(false); }}
+                    className="text-xs" style={{ color: '#a78bfa', cursor: 'pointer', background: 'none', border: 'none' }}>
+              Different email
             </button>
           </div>
           {appointments.map(apt => (
@@ -274,7 +341,11 @@ const ManageBooking = ({ slug, onBack }) => {
           ))}
           <button onClick={onBack} className="btn-ghost text-xs mt-1">← Back to booking</button>
         </div>
-      )}
+      ) : loading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="spinner" />
+        </div>
+      ) : null}
     </div>
   );
 };
