@@ -27,11 +27,13 @@ export default function Browse() {
 
   return (
     <div className="min-h-screen" style={{ background: '#000' }}>
-      {/* Subtle radial glow */}
+      {/* Animated radial glow */}
       <div style={{
-        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+        position: 'fixed', inset: '-80px', pointerEvents: 'none', zIndex: 0,
         background: 'radial-gradient(ellipse 600px 400px at 50% 180px, rgba(124,58,237,0.08), transparent)',
+        animation: 'glowDrift 7s ease-in-out infinite alternate',
       }} />
+      <style>{`@keyframes glowDrift { from { transform: translateX(-30px); } to { transform: translateX(30px); } }`}</style>
 
       <nav style={{
         position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center',
