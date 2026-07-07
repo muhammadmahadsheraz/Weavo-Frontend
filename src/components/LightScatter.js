@@ -27,11 +27,11 @@ export default function LightScatter() {
     const rays = Array.from({ length: RAY_COUNT }, (_, i) => {
       const t = RAY_COUNT <= 1 ? 0 : i / (RAY_COUNT - 1);
       return {
-        angleCenter: (t - 0.5) * 0.7,
-        halfWidth: 0.015 + Math.random() * 0.025,
+        angleCenter: (t - 0.5) * 1.2,
+        halfWidth: 0.04 + Math.random() * 0.06,
         speed: 0.25 + Math.random() * 0.45,
         phase: Math.random() * Math.PI * 2,
-        amp: 0.08 + Math.random() * 0.12,
+        amp: 0.06 + Math.random() * 0.10,
         brightness: 0.55 + Math.random() * 0.45,
       };
     });
@@ -70,9 +70,9 @@ export default function LightScatter() {
           const brightness = ray.brightness * (1 - t * 0.6) * 0.035;
 
           const grad = ctx.createRadialGradient(px, py, 0, px, py, Math.max(span, 4));
-          grad.addColorStop(0, `rgba(124,58,237,${brightness})`);
-          grad.addColorStop(0.5, `rgba(124,58,237,${brightness * 0.5})`);
-          grad.addColorStop(1, 'rgba(124,58,237,0)');
+          grad.addColorStop(0, `rgba(200,185,255,${brightness})`);
+          grad.addColorStop(0.5, `rgba(200,185,255,${brightness * 0.4})`);
+          grad.addColorStop(1, 'rgba(200,185,255,0)');
           ctx.fillStyle = grad;
           ctx.beginPath();
           ctx.ellipse(px, py, Math.max(span * 1.5, 2), Math.max(span, 2), angle + HALF_PI, 0, PI * 2);
@@ -134,25 +134,25 @@ export default function LightScatter() {
           // Lavender inner glow
           ctx.beginPath();
           ctx.arc(px, py, size * 0.8, 0, PI * 2);
-          ctx.fillStyle = `rgba(200,180,255,${Math.min(glow * 0.5, 0.4)})`;
+          ctx.fillStyle = `rgba(220,210,255,${Math.min(glow * 0.45, 0.35)})`;
           ctx.fill();
 
           // Outer bloom
           ctx.beginPath();
           ctx.arc(px, py, size * 2.5, 0, PI * 2);
-          ctx.fillStyle = `rgba(124,58,237,${Math.min(glow * 0.15, 0.12)})`;
+          ctx.fillStyle = `rgba(200,185,255,${Math.min(glow * 0.12, 0.10)})`;
           ctx.fill();
 
           // Soft haze
           ctx.beginPath();
           ctx.arc(px, py, size * 5, 0, PI * 2);
-          ctx.fillStyle = `rgba(160,140,240,${Math.min(glow * 0.06, 0.05)})`;
+          ctx.fillStyle = `rgba(210,200,250,${Math.min(glow * 0.05, 0.04)})`;
           ctx.fill();
         } else {
           // barely visible when outside beams
           ctx.beginPath();
           ctx.arc(px, py, p.size * 0.3, 0, PI * 2);
-          ctx.fillStyle = 'rgba(160,140,240,0.04)';
+          ctx.fillStyle = 'rgba(210,200,250,0.025)';
           ctx.fill();
         }
       }
@@ -186,7 +186,7 @@ export default function LightScatter() {
         position: 'absolute', top: '-34vmax', left: '50%',
         width: '130vmax', height: '110vmax',
         transform: 'translateX(-50%)',
-        background: 'radial-gradient(ellipse 46% 32% at 50% 0%, rgba(124,58,237,0.30) 0%, rgba(124,58,237,0.14) 28%, rgba(80,40,170,0.06) 50%, transparent 72%)',
+        background: 'radial-gradient(ellipse 46% 32% at 50% 0%, rgba(210,195,250,0.28) 0%, rgba(180,160,240,0.12) 28%, rgba(140,120,210,0.05) 50%, transparent 72%)',
         filter: 'blur(42px)', mixBlendMode: 'screen',
         animation: 'ambientBreathe 10s ease-in-out infinite',
       }} />
@@ -196,7 +196,7 @@ export default function LightScatter() {
         position: 'absolute', top: '-16vmax', left: '50%',
         width: '70vmax', height: '20vmax',
         transform: 'translateX(-50%)',
-        background: 'radial-gradient(ellipse 55% 45% at 50% 100%, rgba(124,58,237,0.26) 0%, rgba(6,182,212,0.10) 45%, transparent 78%)',
+        background: 'radial-gradient(ellipse 55% 45% at 50% 100%, rgba(220,210,250,0.22) 0%, rgba(6,182,212,0.08) 45%, transparent 78%)',
         filter: 'blur(24px)', mixBlendMode: 'screen',
         animation: 'surfaceFlicker 4.5s ease-in-out infinite',
       }} />
