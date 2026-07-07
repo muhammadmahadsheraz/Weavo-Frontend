@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/api';
+import Logo from '../../components/Logo';
+import WeavoThreads from '../../components/WeavoThreads';
 
 export default function Browse() {
   const [businesses, setBusinesses] = useState([]);
@@ -25,35 +27,24 @@ export default function Browse() {
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050709' }}>
-      <nav className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="flex items-center gap-2">
-          <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
-            <defs>
-              <linearGradient id="hex" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#7C3AED" />
-                <stop offset="100%" stopColor="#06B6D4" />
-              </linearGradient>
-            </defs>
-            <polygon points="16,2 28,9 28,23 16,30 4,23 4,9" fill="url(#hex)" />
-          </svg>
-          <span className="text-white font-bold text-sm">Weavo AI</span>
-        </div>
+    <div className="min-h-screen" style={{ background: '#000' }}>
+      <WeavoThreads />
+
+      <nav className="relative flex items-center justify-between px-6 py-4" style={{ zIndex: 10, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <Logo iconSize={26} fontSize={13} />
         <div className="flex items-center gap-3">
-          <Link to="/login" className="text-xs font-medium px-4 py-2 rounded-lg transition-all"
-                style={{ color: 'rgba(255,255,255,0.55)', hover: { color: '#fff' } }}>
+          <Link to="/login" className="btn-ghost" style={{ padding: '7px 16px', fontSize: 12 }}>
             Business Login
           </Link>
-          <Link to="/register" className="text-xs font-medium px-4 py-2 rounded-lg transition-all"
-                style={{ background: 'rgba(124,58,237,0.12)', color: '#a78bfa', border: '1px solid rgba(124,58,237,0.2)' }}>
+          <Link to="/register" className="btn-primary" style={{ padding: '7px 16px', fontSize: 12 }}>
             Business Sign Up
           </Link>
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-4 py-12">
+      <div className="relative max-w-5xl mx-auto px-4 py-12" style={{ zIndex: 10 }}>
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-white mb-2">Browse Businesses</h1>
+          <h1 className="text-3xl font-bold mb-2 gradient-text">Browse Businesses</h1>
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
             Find a business and book an appointment
           </p>
@@ -73,7 +64,7 @@ export default function Browse() {
             <div className="spinner" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="glass p-10 text-center max-w-sm mx-auto">
             <p className="text-white text-sm mb-1">No businesses found</p>
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
               {search ? 'Try a different search term.' : 'No businesses are available yet.'}
@@ -83,8 +74,7 @@ export default function Browse() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map(b => (
               <Link key={b._id} to={`/book/${b.slug}`}
-                    className="block p-5 rounded-xl transition-all hover:-translate-y-0.5"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    className="glass glass-hover block p-5 no-underline">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
                      style={{ background: 'rgba(124,58,237,0.15)' }}>
                   <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" strokeWidth={2}>
