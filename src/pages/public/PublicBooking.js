@@ -492,31 +492,42 @@ const PublicBooking = () => {
         </div>
       </nav>
 
-      <div className="relative max-w-2xl mx-auto px-4 pt-14 pb-20" style={{ zIndex: 10 }}>
-        {/* Hero: centered title */}
-        <div className="text-center mb-10">
-          <h1 style={{
-            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
-            fontWeight: 800,
-            lineHeight: 1.1,
-            letterSpacing: '-0.03em',
-            margin: 0,
-            background: 'linear-gradient(135deg, #a78bfa, #06B6D4)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}>
-            Book an Appointment
-          </h1>
-          <p style={{
-            marginTop: 12, fontSize: 14, lineHeight: 1.6,
-            color: 'rgba(255,255,255,0.35)',
-          }}>
-            {biz.name} &mdash; pick a service, choose a time, and book instantly.
-          </p>
+      <div className="relative max-w-6xl mx-auto px-4 pt-10 pb-20" style={{ zIndex: 10 }}>
+        {/* Hero: title left, carousel right */}
+        <div style={{
+          display: 'flex', alignItems: 'flex-end', gap: 48,
+          marginBottom: 48, flexWrap: 'wrap',
+        }}>
+          <div style={{ flex: '1 1 280px' }}>
+            <h1 style={{
+              fontSize: 'clamp(3.5rem, 10vw, 7rem)',
+              fontWeight: 800,
+              lineHeight: 0.9,
+              letterSpacing: '-0.04em',
+              color: '#fff',
+              margin: 0,
+            }}>
+              Book
+              <br />
+              <span style={{
+                background: 'linear-gradient(135deg, #a78bfa, #06B6D4)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                an Appointment
+              </span>
+            </h1>
+            <p style={{
+              marginTop: 20, fontSize: 14, lineHeight: 1.6,
+              color: 'rgba(255,255,255,0.35)', maxWidth: 320,
+            }}>
+              {biz.name} — pick a service, choose a time, and book instantly.
+            </p>
+          </div>
 
           {/* Carousel: services */}
           {services.length > 0 && (
-            <div style={{ maxWidth: 320, margin: '24px auto 0' }}>
+            <div style={{ flex: '0 0 320px', minHeight: 200 }}>
               <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16 }}>
                 <div style={{
                   display: 'flex',
@@ -524,39 +535,50 @@ const PublicBooking = () => {
                   transition: 'transform 0.5s cubic-bezier(0.65, 0, 0.35, 1)',
                 }}>
                   {services.map(svc => (
-                    <div key={svc._id} style={{ minWidth: '100%' }}>
-                      <div className="glass" style={{ padding: 20 }}>
+                    <div key={svc._id}
+                         style={{ textDecoration: 'none', display: 'block', minWidth: '100%' }}>
+                      <div className="glass" style={{ padding: 24 }}>
                         <div style={{
-                          width: 40, height: 40, borderRadius: 12,
+                          width: 44, height: 44, borderRadius: 14,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.12))',
-                          margin: '0 auto 10px',
+                          marginBottom: 14,
                         }}>
-                          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" strokeWidth={1.5}>
+                          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                           </svg>
                         </div>
-                        <h3 style={{ color: '#fff', fontWeight: 600, fontSize: 14, margin: '0 0 2px' }}>{svc.name}</h3>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                          <span style={{ fontSize: 14, fontWeight: 700, color: '#a78bfa' }}>${svc.price}</span>
+                        <h3 style={{ color: '#fff', fontWeight: 600, fontSize: 16, margin: '0 0 4px' }}>
+                          {svc.name}
+                        </h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                          <span style={{ fontSize: 15, fontWeight: 700, color: '#a78bfa' }}>${svc.price}</span>
                           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{svc.duration} min</span>
                         </div>
+                        {svc.description && (
+                          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 1.5, marginTop: 8 }}>
+                            {svc.description}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
 
                 {services.length > 1 && (
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 12 }}>
                     {services.slice(0, 5).map((_, i) => (
                       <button key={i} onClick={() => setCarouselIdx(i)}
                               style={{
-                                width: 5, height: 5, borderRadius: '50%', border: 'none',
+                                width: 6, height: 6, borderRadius: '50%', border: 'none',
                                 cursor: 'pointer', padding: 0,
-                                background: i === carouselIdx ? '#a78bfa' : 'rgba(255,255,255,0.15)',
+                                background: i === carouselIdx ? '#a78bfa' : 'rgba(255,255,255,0.12)',
                                 transition: 'background 0.2s',
                               }} />
                     ))}
+                    {services.length > 5 && (
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginLeft: 2 }}>+{services.length - 5}</span>
+                    )}
                   </div>
                 )}
               </div>
@@ -567,7 +589,7 @@ const PublicBooking = () => {
         {/* Mode toggle */}
         <div className="flex mb-8 rounded-xl p-1" style={{
           background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
-          maxWidth: 400,
+          maxWidth: 400, margin: '0 auto',
         }}>
           <button onClick={() => { setMode('book'); setStep(0); }}
                   className="flex-1 py-2.5 text-sm font-medium rounded-lg transition-all"
@@ -588,7 +610,7 @@ const PublicBooking = () => {
         </div>
 
         {mode === 'book' && (
-          <div className="max-w-2xl">
+          <div className="max-w-2xl" style={{ margin: '0 auto' }}>
             {/* Step indicator */}
             <div className="flex items-center justify-between mb-10 px-2">
               {STEPS.map((s, i) => (
@@ -811,7 +833,7 @@ const PublicBooking = () => {
         )}
 
         {mode === 'manage' && (
-          <div className="glass p-8" style={{ borderRadius: 20, maxWidth: 480 }}>
+          <div className="glass p-8" style={{ borderRadius: 20, maxWidth: 480, margin: '0 auto' }}>
             <ManageBooking slug={slug} onBack={() => setMode('book')} />
           </div>
         )}
