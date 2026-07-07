@@ -4,7 +4,6 @@ import { toast } from 'react-toastify';
 import api from '../../api/api';
 import HelixBackground from '../../components/HelixBackground';
 import ChatWidget from '../../components/ChatWidget';
-import Logo from '../../components/Logo';
 
 const STEPS = ['Service', 'Date & Time', 'Your Details', 'Confirm'];
 
@@ -466,30 +465,35 @@ const PublicBooking = () => {
   return (
     <div className="min-h-screen px-4 py-10 flex flex-col items-center" style={{ background: '#000' }}>
       <HelixBackground />
-      <div className="w-full max-w-lg" style={{ position: 'relative', zIndex: 10 }}>
 
-        {/* Header */}
-        <div className="text-center mb-8">
+      <div className="w-full max-w-2xl" style={{ position: 'relative', zIndex: 10 }}>
+
+        {/* ── Header ── */}
+        <div className="text-center mb-10">
           <div style={{
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.15)',
-            borderRadius: 20, padding: '4px 14px', marginBottom: 16,
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: 'linear-gradient(135deg, rgba(124,58,237,0.12), rgba(6,182,212,0.08))',
+            border: '1px solid rgba(124,58,237,0.15)',
+            borderRadius: 20, padding: '5px 16px', marginBottom: 20,
             fontSize: 11, color: '#a78bfa', fontWeight: 600, letterSpacing: '0.03em',
           }}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
             Book an Appointment
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">{biz.name}</h1>
+          <h1 className="text-4xl font-bold text-white mb-3">{biz.name}</h1>
           {biz.address?.city && (
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>
               {biz.address.city}{biz.address.state ? `, ${biz.address.state}` : ''}
             </p>
           )}
         </div>
 
-        {/* Mode toggle */}
-        <div className="flex mb-6 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+        {/* ── Mode Toggle ── */}
+        <div className="flex mb-8 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
           <button onClick={() => { setMode('book'); setStep(0); }}
-                  className="flex-1 py-2.5 text-sm font-medium transition-all"
+                  className="flex-1 py-2.5 text-sm font-medium rounded-lg transition-all"
                   style={{
                     background: mode === 'book' ? 'rgba(124,58,237,0.2)' : 'transparent',
                     color: mode === 'book' ? '#fff' : 'rgba(255,255,255,0.4)',
@@ -497,7 +501,7 @@ const PublicBooking = () => {
             Book Appointment
           </button>
           <button onClick={() => setMode('manage')}
-                  className="flex-1 py-2.5 text-sm font-medium transition-all"
+                  className="flex-1 py-2.5 text-sm font-medium rounded-lg transition-all"
                   style={{
                     background: mode === 'manage' ? 'rgba(124,58,237,0.2)' : 'transparent',
                     color: mode === 'manage' ? '#fff' : 'rgba(255,255,255,0.4)',
@@ -508,63 +512,97 @@ const PublicBooking = () => {
 
         {mode === 'book' && (
           <>
-            {/* Step indicator */}
-            <div className="flex items-center justify-between mb-8 px-2">
+            {/* ── Step Indicator ── */}
+            <div className="flex items-center justify-between mb-10 px-2">
               {STEPS.map((s, i) => (
                 <React.Fragment key={s}>
-                  <div className="flex flex-col items-center gap-1">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-                         style={{
-                           background: i < step ? '#7C3AED' : i === step ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.06)',
-                           color: i <= step ? '#fff' : 'rgba(255,255,255,0.3)',
-                           border: i === step ? '1px solid #7C3AED' : '1px solid transparent',
-                         }}>
-                      {i < step ? '✓' : i + 1}
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 12, fontWeight: 700,
+                      background: i < step ? '#7C3AED' : i === step ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.05)',
+                      color: i <= step ? '#fff' : 'rgba(255,255,255,0.3)',
+                      border: i === step ? '2px solid rgba(124,58,237,0.6)' : '2px solid transparent',
+                      transition: 'all 0.3s ease',
+                    }}>
+                      {i < step ? (
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                      ) : i + 1}
                     </div>
-                    <span className="text-xs hidden sm:block" style={{ color: i === step ? '#a78bfa' : 'rgba(255,255,255,0.3)' }}>{s}</span>
+                    <span style={{
+                      fontSize: 11, fontWeight: i === step ? 600 : 400,
+                      color: i === step ? '#a78bfa' : 'rgba(255,255,255,0.25)',
+                      transition: 'color 0.3s ease',
+                    }}>{s}</span>
                   </div>
                   {i < STEPS.length - 1 && (
-                    <div className="flex-1 h-px mx-2" style={{ background: i < step ? '#7C3AED' : 'rgba(255,255,255,0.08)' }} />
+                    <div className="flex-1 h-0.5 mx-3 rounded-full"
+                         style={{ background: i < step ? 'linear-gradient(90deg, #7C3AED, #7C3AED)' : 'rgba(255,255,255,0.06)', transition: 'background 0.4s ease' }} />
                   )}
                 </React.Fragment>
               ))}
             </div>
 
-            {/* Card */}
-            <div className="glass p-7" style={{ animation: 'fadeUp 0.3s ease' }}>
+            {/* ── Form Card ── */}
+            <div className="glass p-8" style={{ borderRadius: 20, animation: 'fadeUp 0.35s ease' }}>
 
               {/* Step 0 — Service */}
               {step === 0 && (
-                <div className="space-y-3">
-                  <h3 className="text-base font-semibold text-white mb-4">Choose a service</h3>
-                  {errors.serviceId && <p className="text-xs mb-2" style={{ color: '#f87171' }}>{errors.serviceId}</p>}
-                  {services.map(svc => (
-                    <button key={svc._id} onClick={() => { set('serviceId', svc._id); clearErr('serviceId'); }}
-                            className="w-full text-left p-4 rounded-xl transition-all"
-                            style={{
-                              background: form.serviceId === svc._id ? 'rgba(124,58,237,0.18)' : 'rgba(255,255,255,0.03)',
-                              border: `1px solid ${form.serviceId === svc._id ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.07)'}`,
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-5">Choose a service</h3>
+                  {errors.serviceId && (
+                    <p className="text-xs mb-3" style={{ color: '#f87171' }}>{errors.serviceId}</p>
+                  )}
+                  <div className="space-y-3">
+                    {services.map((svc, idx) => (
+                      <button key={svc._id} onClick={() => { set('serviceId', svc._id); clearErr('serviceId'); }}
+                              className="w-full text-left p-5 rounded-xl transition-all"
+                              style={{
+                                background: form.serviceId === svc._id
+                                  ? 'linear-gradient(135deg, rgba(124,58,237,0.15), rgba(124,58,237,0.05))'
+                                  : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${form.serviceId === svc._id ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.06)'}`,
+                                animation: `fadeUp 0.3s ease ${idx * 0.05}s both`,
+                              }}>
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-start gap-3">
+                            <div style={{
+                              width: 40, height: 40, borderRadius: 12,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              background: form.serviceId === svc._id
+                                ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)',
+                              flexShrink: 0,
                             }}>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="text-sm font-semibold text-white">{svc.name}</p>
-                          {svc.description && <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{svc.description}</p>}
+                              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-white">{svc.name}</p>
+                              {svc.description && (
+                                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{svc.description}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right ml-4 flex-shrink-0">
+                            <p className="text-base font-bold" style={{ color: '#a78bfa' }}>${svc.price}</p>
+                            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{svc.duration} min</p>
+                          </div>
                         </div>
-                        <div className="text-right ml-4 flex-shrink-0">
-                          <p className="text-sm font-bold" style={{ color: '#a78bfa' }}>${svc.price}</p>
-                          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.38)' }}>{svc.duration} min</p>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 
               {/* Step 1 — Date & Time */}
               {step === 1 && (
-                <div className="space-y-5">
-                  <h3 className="text-base font-semibold text-white">Pick a date & time</h3>
-                  <div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-5">Pick a date & time</h3>
+                  <div className="mb-6">
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Date</label>
                     <DateInput value={form.date}
                                onChange={e => { set('date', e.target.value); set('startTime', ''); clearErr('date'); }}
@@ -573,23 +611,23 @@ const PublicBooking = () => {
                   </div>
                   {form.date && (
                     <div>
-                      <label className="block text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>Available slots</label>
+                      <label className="block text-xs font-medium mb-3" style={{ color: 'rgba(255,255,255,0.55)' }}>Available slots</label>
                       {slotsLoading ? (
-                        <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        <div className="flex items-center gap-2 text-sm py-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
                           <div className="spinner" style={{ width: 16, height: 16 }} /> Loading slots...
                         </div>
                       ) : slots.length === 0 ? (
-                        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No available slots on this date.</p>
+                        <p className="text-sm py-4" style={{ color: 'rgba(255,255,255,0.4)' }}>No available slots on this date.</p>
                       ) : (
                         <div>
-                          <div className="grid grid-cols-3 gap-2">
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
                             {slots.map(slot => (
                               <button key={slot} onClick={() => { set('startTime', slot); clearErr('startTime'); }}
-                                      className="py-2 rounded-lg text-sm font-medium transition-all"
+                                      className="py-2.5 rounded-xl text-sm font-medium transition-all"
                                       style={{
-                                        background: form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.05)',
+                                        background: form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.04)',
                                         color: form.startTime === slot ? '#fff' : 'rgba(255,255,255,0.6)',
-                                        border: `1px solid ${form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.08)'}`,
+                                        border: `1px solid ${form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.06)'}`,
                                       }}>
                                 {slot}
                               </button>
@@ -605,61 +643,87 @@ const PublicBooking = () => {
 
               {/* Step 2 — Client details */}
               {step === 2 && (
-                <div className="space-y-4">
-                  <h3 className="text-base font-semibold text-white">Your details</h3>
-                  {[
-                    { label: 'Full Name *', field: 'name', type: 'text', placeholder: 'John Doe', required: true },
-                    { label: 'Email *', field: 'email', type: 'email', placeholder: 'you@email.com', required: true },
-                    { label: 'Phone', field: 'phone', type: 'tel', placeholder: '+1234567890' },
-                  ].map(f => (
-                    <div key={f.field}>
-                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{f.label}</label>
-                      <input type={f.type} value={form.client[f.field]}
-                             onChange={e => { setClient(f.field, e.target.value); clearErr(f.field); }}
-                             onBlur={() => {
-                               const val = form.client[f.field];
-                               if (f.required && !val.trim()) setErr(f.field, `${f.label.replace(' *', '')} is required`);
-                               else if (f.field === 'email' && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) setErr(f.field, 'Enter a valid email');
-                               else clearErr(f.field);
-                             }}
-                             required={f.required} placeholder={f.placeholder}
-                             className="input-dark"
-                             style={errors[f.field] ? { borderColor: '#f87171' } : {}} />
-                      <ErrMsg msg={errors[f.field]} />
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-5">Your details</h3>
+                  <div className="space-y-4">
+                    {[
+                      { label: 'Full Name', field: 'name', type: 'text', placeholder: 'John Doe', required: true },
+                      { label: 'Email', field: 'email', type: 'email', placeholder: 'you@email.com', required: true },
+                      { label: 'Phone (optional)', field: 'phone', type: 'tel', placeholder: '+1 (234) 567-890' },
+                    ].map(f => (
+                      <div key={f.field}>
+                        <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{f.label}</label>
+                        <input type={f.type} value={form.client[f.field]}
+                               onChange={e => { setClient(f.field, e.target.value); clearErr(f.field); }}
+                               onBlur={() => {
+                                 const val = form.client[f.field];
+                                 if (f.required && !val.trim()) setErr(f.field, `${f.label} is required`);
+                                 else if (f.field === 'email' && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) setErr(f.field, 'Enter a valid email');
+                                 else clearErr(f.field);
+                               }}
+                               placeholder={f.placeholder}
+                               className="input-dark"
+                               style={errors[f.field] ? { borderColor: '#f87171' } : {}} />
+                        <ErrMsg msg={errors[f.field]} />
+                      </div>
+                    ))}
+                    <div>
+                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Notes (optional)</label>
+                      <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
+                                rows={3} placeholder="Any special requests or additional information?"
+                                className="input-dark resize-none" />
                     </div>
-                  ))}
-                  <div>
-                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Notes (optional)</label>
-                    <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
-                              rows={2} placeholder="Any special requests?" className="input-dark resize-none" />
                   </div>
                 </div>
               )}
 
               {/* Step 3 — Confirm */}
-              {step === 3 && (
-                <div className="space-y-4">
-                  <h3 className="text-base font-semibold text-white">Review your booking</h3>
-                  {[
-                    { label: 'Business',   value: biz.name },
-                    { label: 'Service',    value: `${selectedService?.name} · ${selectedService?.duration} min` },
-                    { label: 'Price',      value: `$${selectedService?.price}` },
-                    { label: 'Date',       value: new Date(form.date).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }) },
-                    { label: 'Time',       value: form.startTime },
-                    { label: 'Name',       value: form.client.name },
-                    { label: 'Email',      value: form.client.email },
-                  ].map(r => (
-                    <div key={r.label} className="flex justify-between items-start py-2"
-                         style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                      <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{r.label}</span>
-                      <span className="text-xs font-medium text-white text-right ml-4 max-w-xs">{r.value}</span>
+              {step === 3 && selectedService && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-5">Review your booking</h3>
+                  <div style={{
+                    background: 'rgba(124,58,237,0.06)', borderRadius: 12,
+                    border: '1px solid rgba(124,58,237,0.1)', padding: 16, marginBottom: 20,
+                  }}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div style={{
+                        width: 40, height: 40, borderRadius: 12,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'rgba(124,58,237,0.15)',
+                      }}>
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white">{selectedService.name}</p>
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                          {selectedService.duration} min · ${selectedService.price}
+                        </p>
+                      </div>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      { label: 'Date', value: new Date(form.date).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }) },
+                      { label: 'Time', value: form.startTime },
+                      { label: 'Name', value: form.client.name },
+                      { label: 'Email', value: form.client.email },
+                      { label: 'Phone', value: form.client.phone || '—' },
+                    ].map(r => (
+                      <div key={r.label} className="flex justify-between items-center py-2"
+                           style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{r.label}</span>
+                        <span className="text-xs font-medium text-white">{r.value}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
               {/* Navigation */}
-              <div className="flex gap-3 mt-7">
+              <div className="flex gap-3 mt-8">
                 {step > 0 && (
                   <button onClick={() => setStep(s => s - 1)} className="btn-ghost flex-1">Back</button>
                 )}
@@ -678,16 +742,20 @@ const PublicBooking = () => {
         )}
 
         {mode === 'manage' && (
-          <div className="glass p-7">
+          <div className="glass p-8" style={{ borderRadius: 20 }}>
             <ManageBooking slug={slug} onBack={() => setMode('book')} />
           </div>
         )}
 
       </div>
+
       <ChatWidget slug={slug} businessName={biz.name} services={services} onManageBooking={() => setMode('manage')} />
 
       <style>{`
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
       `}</style>
     </div>
   );
