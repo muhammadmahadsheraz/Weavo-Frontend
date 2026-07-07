@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import WeavoThreads from '../components/WeavoThreads';
+import Logo from '../components/Logo';
 
 const AuthLayout = () => (
   <div
@@ -14,22 +15,7 @@ const AuthLayout = () => (
     <div className="relative w-full max-w-md" style={{ zIndex: 10 }}>
       {/* Logo */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#7C3AED,#06B6D4)' }}
-          >
-            <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-              <path d="M8 2L13 5V11L8 14L3 11V5L8 2Z" fill="white" fillOpacity="0.92"/>
-            </svg>
-          </div>
-          <span
-            className="text-xl font-bold tracking-tight"
-            style={{ color: '#fff', letterSpacing: '-0.02em' }}
-          >
-            Weavo <span className="gradient-text">AI</span>
-          </span>
-        </div>
+        <Logo iconSize={32} fontSize={20} />
       </div>
 
       {/* Glass card — low opacity background so backdrop-filter blur is visible */}

@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import api from '../../api/api';
 import WeavoThreads from '../../components/WeavoThreads';
 import ChatWidget from '../../components/ChatWidget';
+import Logo from '../../components/Logo';
 
 const STEPS = ['Service', 'Date & Time', 'Your Details', 'Confirm'];
 
@@ -101,14 +102,8 @@ const PublicBooking = () => {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                 style={{ background: 'linear-gradient(135deg,#7C3AED,#06B6D4)' }}>
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                <path d="M8 2L13 5V11L8 14L3 11V5L8 2Z" fill="white" fillOpacity="0.9"/>
-              </svg>
-            </div>
-            <span className="text-sm font-bold text-white">Weavo AI</span>
+          <div className="mb-4">
+            <Logo iconSize={28} fontSize={14} />
           </div>
           <h1 className="text-2xl font-bold text-white">{biz.name}</h1>
           {biz.address?.city && (

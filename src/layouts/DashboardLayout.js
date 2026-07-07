@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import HelixBackground from '../components/HelixBackground';
+import Logo from '../components/Logo';
 
 const NAV = [
   { name: 'Dashboard',    path: '/',            exact: true, icon: <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg> },
@@ -17,17 +18,7 @@ const SidebarContent = ({ collapsed, setCollapsed, isActive, user, onLogout }) =
   <>
     {/* Logo */}
     <div className="flex items-center gap-3 px-4 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-      <div className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center"
-           style={{ background: 'linear-gradient(135deg,#7C3AED,#06B6D4)' }}>
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-          <path d="M8 2L13 5V11L8 14L3 11V5L8 2Z" fill="white" fillOpacity="0.9"/>
-        </svg>
-      </div>
-      {!collapsed && (
-        <span className="text-base font-bold text-white tracking-tight whitespace-nowrap">
-          Weavo <span className="gradient-text">AI</span>
-        </span>
-      )}
+      <Logo iconSize={32} fontSize={16} showText={!collapsed} />
       {setCollapsed && (
         <button onClick={() => setCollapsed(c => !c)} className="ml-auto hidden lg:block"
                 style={{ color: 'rgba(255,255,255,0.3)' }}>
