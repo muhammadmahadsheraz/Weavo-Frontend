@@ -495,7 +495,7 @@ const PublicBooking = () => {
       <div className="relative max-w-6xl mx-auto px-4 pt-10 pb-20" style={{ zIndex: 10 }}>
         {/* Hero: title left, carousel right */}
         <div style={{
-          display: 'flex', alignItems: 'flex-end', gap: 48,
+          display: 'flex', alignItems: 'center', gap: 48,
           marginBottom: 48, flexWrap: 'wrap',
         }}>
           <div style={{ flex: '1 1 280px' }}>
@@ -504,18 +504,12 @@ const PublicBooking = () => {
               fontWeight: 800,
               lineHeight: 0.9,
               letterSpacing: '-0.04em',
-              color: '#fff',
               margin: 0,
+              background: 'linear-gradient(135deg, #a78bfa, #06B6D4)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
             }}>
-              Book
-              <br />
-              <span style={{
-                background: 'linear-gradient(135deg, #a78bfa, #06B6D4)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}>
-                an Appointment
-              </span>
+              Book an Appointment
             </h1>
             <p style={{
               marginTop: 20, fontSize: 14, lineHeight: 1.6,
