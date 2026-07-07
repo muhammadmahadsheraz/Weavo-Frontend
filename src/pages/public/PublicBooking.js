@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../api/api';
@@ -7,6 +7,239 @@ import ChatWidget from '../../components/ChatWidget';
 import Logo from '../../components/Logo';
 
 const STEPS = ['Service', 'Date & Time', 'Your Details', 'Confirm'];
+
+const ManageBooking = ({ slug, onBack }) => {
+  const [email, setEmail] = useState('');
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [lookedUp, setLookedUp] = useState(false);
+  const [action, setAction] = useState(null);
+  const [actionApt, setActionApt] = useState(null);
+  const [loadingAction, setLoadingAction] = useState(false);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState('');
+  const [rescheduleSlots, setRescheduleSlots] = useState([]);
+  const [rescheduleSlotsLoading, setRescheduleSlotsLoading] = useState(false);
+  const [resolved, setResolved] = useState(false);
+
+  const handleLookup = async () => {
+    if (!email) return;
+    setLoading(true);
+    setLookedUp(false);
+    try {
+      const { data } = await api.get(`/public/book/${slug}/lookup`, { params: { email } });
+      setAppointments(data.appointments);
+    } catch {
+      toast.error('Failed to look up appointments');
+    } finally {
+      setLoading(false);
+      setLookedUp(true);
+    }
+  };
+
+  const handleCancel = async (apt) => {
+    setLoadingAction(true);
+    try {
+      await api.post(`/public/book/${slug}/cancel`, { appointmentId: apt._id, email });
+      toast.success('Appointment cancelled');
+      setAppointments(p => p.filter(a => a._id !== apt._id));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to cancel');
+    } finally {
+      setLoadingAction(false);
+      setAction(null);
+    }
+  };
+
+  const handleReschedule = async () => {
+    if (!rescheduleDate || !rescheduleTime) return;
+    setLoadingAction(true);
+    try {
+      await api.post(`/public/book/${slug}/reschedule`, {
+        appointmentId: actionApt._id, email, date: rescheduleDate, startTime: rescheduleTime,
+      });
+      toast.success('Appointment rescheduled');
+      setResolved(true);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to reschedule');
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  const fetchRescheduleSlots = useCallback(async (date) => {
+    if (!date || !actionApt) return;
+    setRescheduleSlotsLoading(true);
+    try {
+      const { data } = await api.get(`/public/book/${slug}/slots`, {
+        params: { date, serviceId: actionApt.service?._id },
+      });
+      setRescheduleSlots(data.slots || []);
+    } catch {
+      setRescheduleSlots([]);
+    } finally {
+      setRescheduleSlotsLoading(false);
+    }
+  }, [slug, actionApt]);
+
+  useEffect(() => {
+    if (action === 'reschedule' && rescheduleDate) {
+      fetchRescheduleSlots(rescheduleDate);
+    }
+  }, [action, rescheduleDate, fetchRescheduleSlots]);
+
+  if (resolved) return (
+    <div className="text-center py-6">
+      <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
+           style={{ background: 'rgba(34,197,94,0.15)' }}>
+        <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#4ade80" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <p className="text-white font-semibold mb-1">Appointment rescheduled!</p>
+      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Check your email for the updated details.</p>
+      <button onClick={() => { setAction(null); setActionApt(null); setResolved(false); setRescheduleDate(''); setRescheduleTime(''); setRescheduleSlots([]); }}
+              className="btn-ghost mt-4 text-sm">Back to my bookings</button>
+    </div>
+  );
+
+  if (action === 'reschedule' && actionApt) return (
+    <div className="space-y-5">
+      <h3 className="text-base font-semibold text-white">Reschedule</h3>
+      <div>
+        <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>New Date</label>
+        <input type="date" value={rescheduleDate}
+               onChange={e => { setRescheduleDate(e.target.value); setRescheduleTime(''); }}
+               min={new Date().toISOString().split('T')[0]} className="input-dark" />
+      </div>
+      {rescheduleDate && (
+        <div>
+          <label className="block text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>New Time</label>
+          {rescheduleSlotsLoading ? (
+            <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <div className="spinner" style={{ width: 16, height: 16 }} /> Loading slots...
+            </div>
+          ) : rescheduleSlots.length === 0 ? (
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No available slots on this date.</p>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {rescheduleSlots.map(slot => (
+                <button key={slot} onClick={() => setRescheduleTime(slot)}
+                        className="py-2 rounded-lg text-sm font-medium transition-all"
+                        style={{
+                          background: rescheduleTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.05)',
+                          color: rescheduleTime === slot ? '#fff' : 'rgba(255,255,255,0.6)',
+                          border: `1px solid ${rescheduleTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.08)'}`,
+                        }}>
+                  {slot}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      <div className="flex gap-3 pt-2">
+        <button onClick={() => { setAction(null); setActionApt(null); setRescheduleDate(''); setRescheduleTime(''); }}
+                className="btn-ghost flex-1">Back</button>
+        <button onClick={handleReschedule} disabled={!rescheduleDate || !rescheduleTime || loadingAction}
+                className="btn-primary flex-1">
+          {loadingAction ? 'Rescheduling...' : 'Confirm Reschedule'}
+        </button>
+      </div>
+    </div>
+  );
+
+  if (action === 'cancel' && actionApt) return (
+    <div className="text-center py-4">
+      <p className="text-sm text-white mb-2">Cancel this appointment?</p>
+      <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
+        {actionApt.service?.name} — {new Date(actionApt.date).toLocaleDateString()} at {actionApt.startTime}
+      </p>
+      <div className="flex gap-3">
+        <button onClick={() => { setAction(null); setActionApt(null); }} className="btn-ghost flex-1">Keep it</button>
+        <button onClick={() => handleCancel(actionApt)} disabled={loadingAction}
+                className="btn-primary flex-1" style={{ background: '#dc2626' }}>
+          {loadingAction ? 'Cancelling...' : 'Yes, Cancel'}
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <h3 className="text-base font-semibold text-white mb-4">Manage My Booking</h3>
+      {!lookedUp ? (
+        <div>
+          <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            Enter the email you used when booking to see your appointments.
+          </p>
+          <div className="flex gap-2">
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                   placeholder="you@email.com"
+                   onKeyDown={e => e.key === 'Enter' && handleLookup()}
+                   className="input-dark flex-1" />
+            <button onClick={handleLookup} disabled={!email || loading}
+                    className="btn-primary" style={{ padding: '9px 18px', fontSize: 13 }}>
+              {loading ? '...' : 'Look up'}
+            </button>
+          </div>
+          <button onClick={onBack} className="btn-ghost mt-3 text-xs">← Back to booking</button>
+        </div>
+      ) : appointments.length === 0 ? (
+        <div className="text-center py-4">
+          <p className="text-sm text-white mb-1">No upcoming appointments found</p>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Check the email or book a new appointment.</p>
+          <button onClick={() => setLookedUp(false)} className="btn-ghost mt-3 text-xs">Try another email</button>
+          <button onClick={onBack} className="btn-ghost mt-1 text-xs">← Back to booking</button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              {appointments.length} appointment{appointments.length > 1 ? 's' : ''} found
+            </p>
+            <button onClick={() => setLookedUp(false)} className="text-xs" style={{ color: '#a78bfa', cursor: 'pointer', background: 'none', border: 'none' }}>
+              Change email
+            </button>
+          </div>
+          {appointments.map(apt => (
+            <div key={apt._id} className="p-4 rounded-xl"
+                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="text-sm font-semibold text-white">{apt.service?.name}</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    {new Date(apt.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {apt.startTime}
+                  </p>
+                </div>
+                <span className="text-xs font-medium px-2 py-0.5 rounded"
+                      style={{
+                        background: apt.status === 'confirmed' ? 'rgba(34,197,94,0.15)' : 'rgba(234,179,8,0.15)',
+                        color: apt.status === 'confirmed' ? '#4ade80' : '#eab308',
+                      }}>
+                  {apt.status}
+                </span>
+              </div>
+              <div className="flex gap-2 mt-3">
+                <button onClick={() => { setAction('cancel'); setActionApt(apt); }}
+                        className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                        style={{ background: 'rgba(220,38,38,0.12)', color: '#f87171', border: '1px solid rgba(220,38,38,0.2)', cursor: 'pointer' }}>
+                  Cancel
+                </button>
+                <button onClick={() => { setAction('reschedule'); setActionApt(apt); }}
+                        className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                        style={{ background: 'rgba(124,58,237,0.12)', color: '#a78bfa', border: '1px solid rgba(124,58,237,0.2)', cursor: 'pointer' }}>
+                  Reschedule
+                </button>
+              </div>
+            </div>
+          ))}
+          <button onClick={onBack} className="btn-ghost text-xs mt-1">← Back to booking</button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const PublicBooking = () => {
   const { slug } = useParams();
@@ -18,6 +251,7 @@ const PublicBooking = () => {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone]       = useState(false);
+  const [mode, setMode]       = useState('book');
 
   const [form, setForm] = useState({
     serviceId: '',
@@ -88,9 +322,11 @@ const PublicBooking = () => {
         <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
           Your appointment at <strong className="text-white">{biz.name}</strong> is pending confirmation from the business.
         </p>
-        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+        <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
           You'll receive an email once it's confirmed.
         </p>
+        <button onClick={() => { setDone(false); setStep(0); setForm({ serviceId:'', date:'', startTime:'', client:{name:'',email:'',phone:''}, notes:'' }); setMode('manage'); }}
+                className="btn-ghost text-xs">Manage your booking</button>
       </div>
     </div>
   );
@@ -113,166 +349,197 @@ const PublicBooking = () => {
           )}
         </div>
 
-        {/* Step indicator */}
-        <div className="flex items-center justify-between mb-8 px-2">
-          {STEPS.map((s, i) => (
-            <React.Fragment key={s}>
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-                     style={{
-                       background: i < step ? '#7C3AED' : i === step ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.06)',
-                       color: i <= step ? '#fff' : 'rgba(255,255,255,0.3)',
-                       border: i === step ? '1px solid #7C3AED' : '1px solid transparent',
-                     }}>
-                  {i < step ? '✓' : i + 1}
-                </div>
-                <span className="text-xs hidden sm:block" style={{ color: i === step ? '#a78bfa' : 'rgba(255,255,255,0.3)' }}>{s}</span>
-              </div>
-              {i < STEPS.length - 1 && (
-                <div className="flex-1 h-px mx-2" style={{ background: i < step ? '#7C3AED' : 'rgba(255,255,255,0.08)' }} />
-              )}
-            </React.Fragment>
-          ))}
+        {/* Mode toggle */}
+        <div className="flex mb-6 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+          <button onClick={() => { setMode('book'); setStep(0); }}
+                  className="flex-1 py-2.5 text-sm font-medium transition-all"
+                  style={{
+                    background: mode === 'book' ? 'rgba(124,58,237,0.2)' : 'transparent',
+                    color: mode === 'book' ? '#fff' : 'rgba(255,255,255,0.4)',
+                  }}>
+            Book Appointment
+          </button>
+          <button onClick={() => setMode('manage')}
+                  className="flex-1 py-2.5 text-sm font-medium transition-all"
+                  style={{
+                    background: mode === 'manage' ? 'rgba(124,58,237,0.2)' : 'transparent',
+                    color: mode === 'manage' ? '#fff' : 'rgba(255,255,255,0.4)',
+                  }}>
+            Manage Booking
+          </button>
         </div>
 
-        {/* Card */}
-        <div className="glass p-7" style={{ backdropFilter: 'blur(48px)', background: 'rgba(12,8,24,0.12)' }}>
-
-          {/* Step 0 — Service */}
-          {step === 0 && (
-            <div className="space-y-3">
-              <h3 className="text-base font-semibold text-white mb-4">Choose a service</h3>
-              {services.map(svc => (
-                <button key={svc._id} onClick={() => set('serviceId', svc._id)}
-                        className="w-full text-left p-4 rounded-xl transition-all"
-                        style={{
-                          background: form.serviceId === svc._id ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.04)',
-                          border: `1px solid ${form.serviceId === svc._id ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.07)'}`,
-                        }}>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-sm font-semibold text-white">{svc.name}</p>
-                      {svc.description && <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{svc.description}</p>}
+        {mode === 'book' && (
+          <>
+            {/* Step indicator */}
+            <div className="flex items-center justify-between mb-8 px-2">
+              {STEPS.map((s, i) => (
+                <React.Fragment key={s}>
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                         style={{
+                           background: i < step ? '#7C3AED' : i === step ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.06)',
+                           color: i <= step ? '#fff' : 'rgba(255,255,255,0.3)',
+                           border: i === step ? '1px solid #7C3AED' : '1px solid transparent',
+                         }}>
+                      {i < step ? '✓' : i + 1}
                     </div>
-                    <div className="text-right ml-4 flex-shrink-0">
-                      <p className="text-sm font-bold" style={{ color: '#a78bfa' }}>${svc.price}</p>
-                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.38)' }}>{svc.duration} min</p>
-                    </div>
+                    <span className="text-xs hidden sm:block" style={{ color: i === step ? '#a78bfa' : 'rgba(255,255,255,0.3)' }}>{s}</span>
                   </div>
-                </button>
+                  {i < STEPS.length - 1 && (
+                    <div className="flex-1 h-px mx-2" style={{ background: i < step ? '#7C3AED' : 'rgba(255,255,255,0.08)' }} />
+                  )}
+                </React.Fragment>
               ))}
             </div>
-          )}
 
-          {/* Step 1 — Date & Time */}
-          {step === 1 && (
-            <div className="space-y-5">
-              <h3 className="text-base font-semibold text-white">Pick a date & time</h3>
-              <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Date</label>
-                <input type="date" value={form.date} onChange={e => { set('date', e.target.value); set('startTime', ''); }}
-                       min={new Date().toISOString().split('T')[0]} className="input-dark" />
-              </div>
-              {form.date && (
-                <div>
-                  <label className="block text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>Available slots</label>
-                  {slotsLoading ? (
-                    <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                      <div className="spinner" style={{ width: 16, height: 16 }} /> Loading slots...
-                    </div>
-                  ) : slots.length === 0 ? (
-                    <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No available slots on this date.</p>
-                  ) : (
-                    <div className="grid grid-cols-3 gap-2">
-                      {slots.map(slot => (
-                        <button key={slot} onClick={() => set('startTime', slot)}
-                                className="py-2 rounded-lg text-sm font-medium transition-all"
-                                style={{
-                                  background: form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.05)',
-                                  color: form.startTime === slot ? '#fff' : 'rgba(255,255,255,0.6)',
-                                  border: `1px solid ${form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.08)'}`,
-                                }}>
-                          {slot}
-                        </button>
-                      ))}
+            {/* Card */}
+            <div className="glass p-7" style={{ backdropFilter: 'blur(48px)', background: 'rgba(12,8,24,0.12)' }}>
+
+              {/* Step 0 — Service */}
+              {step === 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-base font-semibold text-white mb-4">Choose a service</h3>
+                  {services.map(svc => (
+                    <button key={svc._id} onClick={() => set('serviceId', svc._id)}
+                            className="w-full text-left p-4 rounded-xl transition-all"
+                            style={{
+                              background: form.serviceId === svc._id ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.04)',
+                              border: `1px solid ${form.serviceId === svc._id ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.07)'}`,
+                            }}>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-sm font-semibold text-white">{svc.name}</p>
+                          {svc.description && <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{svc.description}</p>}
+                        </div>
+                        <div className="text-right ml-4 flex-shrink-0">
+                          <p className="text-sm font-bold" style={{ color: '#a78bfa' }}>${svc.price}</p>
+                          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.38)' }}>{svc.duration} min</p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Step 1 — Date & Time */}
+              {step === 1 && (
+                <div className="space-y-5">
+                  <h3 className="text-base font-semibold text-white">Pick a date & time</h3>
+                  <div>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Date</label>
+                    <input type="date" value={form.date} onChange={e => { set('date', e.target.value); set('startTime', ''); }}
+                           min={new Date().toISOString().split('T')[0]} className="input-dark" />
+                  </div>
+                  {form.date && (
+                    <div>
+                      <label className="block text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>Available slots</label>
+                      {slotsLoading ? (
+                        <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          <div className="spinner" style={{ width: 16, height: 16 }} /> Loading slots...
+                        </div>
+                      ) : slots.length === 0 ? (
+                        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No available slots on this date.</p>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-2">
+                          {slots.map(slot => (
+                            <button key={slot} onClick={() => set('startTime', slot)}
+                                    className="py-2 rounded-lg text-sm font-medium transition-all"
+                                    style={{
+                                      background: form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.05)',
+                                      color: form.startTime === slot ? '#fff' : 'rgba(255,255,255,0.6)',
+                                      border: `1px solid ${form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.08)'}`,
+                                    }}>
+                              {slot}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Step 2 — Client details */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <h3 className="text-base font-semibold text-white">Your details</h3>
-              {[
-                { label: 'Full Name *', field: 'name', type: 'text', placeholder: 'John Doe', required: true },
-                { label: 'Email *', field: 'email', type: 'email', placeholder: 'you@email.com', required: true },
-                { label: 'Phone', field: 'phone', type: 'tel', placeholder: '+1234567890' },
-              ].map(f => (
-                <div key={f.field}>
-                  <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{f.label}</label>
-                  <input type={f.type} value={form.client[f.field]} onChange={e => setClient(f.field, e.target.value)}
-                         required={f.required} placeholder={f.placeholder} className="input-dark" />
+              {/* Step 2 — Client details */}
+              {step === 2 && (
+                <div className="space-y-4">
+                  <h3 className="text-base font-semibold text-white">Your details</h3>
+                  {[
+                    { label: 'Full Name *', field: 'name', type: 'text', placeholder: 'John Doe', required: true },
+                    { label: 'Email *', field: 'email', type: 'email', placeholder: 'you@email.com', required: true },
+                    { label: 'Phone', field: 'phone', type: 'tel', placeholder: '+1234567890' },
+                  ].map(f => (
+                    <div key={f.field}>
+                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{f.label}</label>
+                      <input type={f.type} value={form.client[f.field]} onChange={e => setClient(f.field, e.target.value)}
+                             required={f.required} placeholder={f.placeholder} className="input-dark" />
+                    </div>
+                  ))}
+                  <div>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Notes (optional)</label>
+                    <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
+                              rows={2} placeholder="Any special requests?" className="input-dark resize-none" />
+                  </div>
                 </div>
-              ))}
-              <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Notes (optional)</label>
-                <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
-                          rows={2} placeholder="Any special requests?" className="input-dark resize-none" />
+              )}
+
+              {/* Step 3 — Confirm */}
+              {step === 3 && (
+                <div className="space-y-4">
+                  <h3 className="text-base font-semibold text-white">Review your booking</h3>
+                  {[
+                    { label: 'Business',   value: biz.name },
+                    { label: 'Service',    value: `${selectedService?.name} · ${selectedService?.duration} min` },
+                    { label: 'Price',      value: `$${selectedService?.price}` },
+                    { label: 'Date',       value: new Date(form.date).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }) },
+                    { label: 'Time',       value: form.startTime },
+                    { label: 'Name',       value: form.client.name },
+                    { label: 'Email',      value: form.client.email },
+                  ].map(r => (
+                    <div key={r.label} className="flex justify-between items-start py-2"
+                         style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{r.label}</span>
+                      <span className="text-xs font-medium text-white text-right ml-4 max-w-xs">{r.value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Navigation */}
+              <div className="flex gap-3 mt-7">
+                {step > 0 && (
+                  <button onClick={() => setStep(s => s - 1)} className="btn-ghost flex-1">Back</button>
+                )}
+                {step < 3 ? (
+                  <button
+                    onClick={() => setStep(s => s + 1)}
+                    disabled={
+                      (step === 0 && !form.serviceId) ||
+                      (step === 1 && (!form.date || !form.startTime)) ||
+                      (step === 2 && (!form.client.name || !form.client.email))
+                    }
+                    className="btn-primary flex-1"
+                  >
+                    Continue
+                  </button>
+                ) : (
+                  <button onClick={handleSubmit} disabled={submitting} className="btn-primary flex-1">
+                    {submitting ? 'Confirming...' : 'Confirm Booking'}
+                  </button>
+                )}
               </div>
             </div>
-          )}
+          </>
+        )}
 
-          {/* Step 3 — Confirm */}
-          {step === 3 && (
-            <div className="space-y-4">
-              <h3 className="text-base font-semibold text-white">Review your booking</h3>
-              {[
-                { label: 'Business',   value: biz.name },
-                { label: 'Service',    value: `${selectedService?.name} · ${selectedService?.duration} min` },
-                { label: 'Price',      value: `$${selectedService?.price}` },
-                { label: 'Date',       value: new Date(form.date).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' }) },
-                { label: 'Time',       value: form.startTime },
-                { label: 'Name',       value: form.client.name },
-                { label: 'Email',      value: form.client.email },
-              ].map(r => (
-                <div key={r.label} className="flex justify-between items-start py-2"
-                     style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{r.label}</span>
-                  <span className="text-xs font-medium text-white text-right ml-4 max-w-xs">{r.value}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Navigation */}
-          <div className="flex gap-3 mt-7">
-            {step > 0 && (
-              <button onClick={() => setStep(s => s - 1)} className="btn-ghost flex-1">Back</button>
-            )}
-            {step < 3 ? (
-              <button
-                onClick={() => setStep(s => s + 1)}
-                disabled={
-                  (step === 0 && !form.serviceId) ||
-                  (step === 1 && (!form.date || !form.startTime)) ||
-                  (step === 2 && (!form.client.name || !form.client.email))
-                }
-                className="btn-primary flex-1"
-              >
-                Continue
-              </button>
-            ) : (
-              <button onClick={handleSubmit} disabled={submitting} className="btn-primary flex-1">
-                {submitting ? 'Confirming...' : 'Confirm Booking'}
-              </button>
-            )}
+        {mode === 'manage' && (
+          <div className="glass p-7" style={{ backdropFilter: 'blur(48px)', background: 'rgba(12,8,24,0.12)' }}>
+            <ManageBooking slug={slug} onBack={() => setMode('book')} />
           </div>
-        </div>
+        )}
+
       </div>
-      <ChatWidget slug={slug} businessName={biz.name} services={services} />
+      <ChatWidget slug={slug} businessName={biz.name} services={services} onManageBooking={() => setMode('manage')} />
     </div>
   );
 };

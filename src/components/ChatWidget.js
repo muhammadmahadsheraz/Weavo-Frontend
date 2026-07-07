@@ -10,7 +10,7 @@ const FIELDS = [
   { key: 'phone', label: 'Phone', optional: true },
 ];
 
-const ChatWidget = ({ slug, businessName, services }) => {
+const ChatWidget = ({ slug, businessName, services, onManageBooking }) => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'assistant', text: `Hi! I'm the AI receptionist. Ask me about services, hours, or booking an appointment.` }
@@ -42,8 +42,9 @@ const ChatWidget = ({ slug, businessName, services }) => {
     try {
       const history = messages.slice(1).map(m => ({ role: m.role, text: m.text }));
       const { data } = await api.post(`/public/receptionist/${slug}`, { message: text, history });
+      const { action } = data.collectedData || {};
       setBookingData(prev => ({ ...prev, ...data.collectedData }));
-      setMessages(p => [...p, { role: 'assistant', text: data.response }]);
+      setMessages(p => [...p, { role: 'assistant', text: data.response, action }]);
     } catch {
       setMessages(p => [...p, { role: 'assistant', text: "Sorry, I'm having trouble responding right now. Please try again." }]);
     } finally {
@@ -193,6 +194,16 @@ Time: ${bookingData.time}\nName: ${bookingData.name}\nEmail: ${bookingData.email
                     </svg>
                     Booking confirmed
                   </div>
+                )}
+                {(msg.action === 'cancel' || msg.action === 'reschedule') && onManageBooking && (
+                  <button onClick={() => { onManageBooking(); setOpen(false); }}
+                          style={{
+                            marginTop: 6, padding: '7px 14px', borderRadius: 8, fontSize: 11, fontWeight: 600,
+                            background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.25)',
+                            color: '#a78bfa', cursor: 'pointer', width: '100%', textAlign: 'center',
+                          }}>
+                    Open Manage Booking →
+                  </button>
                 )}
               </div>
             ))}
