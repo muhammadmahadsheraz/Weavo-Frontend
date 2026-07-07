@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/api';
 import Logo from '../../components/Logo';
-import WeavoThreads from '../../components/WeavoThreads';
 
 export default function Browse() {
   const [businesses, setBusinesses] = useState([]);
@@ -28,39 +27,51 @@ export default function Browse() {
 
   return (
     <div className="min-h-screen" style={{ background: '#000' }}>
-      <WeavoThreads />
+      {/* Subtle radial glow */}
+      <div style={{
+        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+        background: 'radial-gradient(ellipse 600px 400px at 50% 180px, rgba(124,58,237,0.08), transparent)',
+      }} />
 
-      <nav className="relative flex items-center justify-between px-6 py-4" style={{ zIndex: 10, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <Logo iconSize={26} fontSize={13} />
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="btn-ghost" style={{ padding: '7px 16px', fontSize: 12 }}>
+      <nav style={{
+        position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between', padding: '14px 24px',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+      }}>
+        <Logo iconSize={24} fontSize={12} />
+        <div className="flex items-center gap-2.5">
+          <Link to="/login" className="btn-ghost" style={{ padding: '6px 14px', fontSize: 12 }}>
             Business Login
           </Link>
-          <Link to="/register" className="btn-primary" style={{ padding: '7px 16px', fontSize: 12 }}>
-            Business Sign Up
+          <Link to="/register" className="btn-primary" style={{ padding: '6px 14px', fontSize: 12 }}>
+            Sign Up
           </Link>
         </div>
       </nav>
 
-      <div className="relative max-w-5xl mx-auto px-4 py-12" style={{ zIndex: 10 }}>
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold mb-2 gradient-text">Browse Businesses</h1>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
+      <div className="relative max-w-5xl mx-auto px-4 pt-14 pb-20" style={{ zIndex: 10 }}>
+        {/* Heading */}
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-bold text-white mb-3">Browse Businesses</h1>
+          <div style={{ width: 40, height: 3, margin: '0 auto 12px', borderRadius: 2, background: 'linear-gradient(90deg, #7C3AED, #06B6D4)' }} />
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
             Find a business and book an appointment
           </p>
         </div>
 
-        <div className="relative max-w-md mx-auto mb-10">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.3)" strokeWidth={2}>
+        {/* Search */}
+        <div className="relative max-w-md mx-auto mb-12">
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.25)" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
                  placeholder="Search businesses..."
-                 className="input-dark w-full pl-10" />
+                 className="input-dark w-full pl-9" />
         </div>
 
+        {/* Content */}
         {loading ? (
-          <div className="flex justify-center py-16">
+          <div className="flex justify-center py-20">
             <div className="spinner" />
           </div>
         ) : filtered.length === 0 ? (
