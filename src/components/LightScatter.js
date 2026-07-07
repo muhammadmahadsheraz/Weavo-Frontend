@@ -7,22 +7,22 @@ export default function LightScatter() {
     const el = moteRef.current;
     if (!el) return;
     const frag = document.createDocumentFragment();
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 80; i++) {
       const m = document.createElement('div');
-      const size = Math.random() * 1.8 + 0.4;
+      const size = Math.random() * 2 + 0.5;
       const left = Math.random() * 100;
-      const dur1 = Math.random() * 20 + 18;
-      const dur2 = Math.random() * 8 + 6;
-      const delay = Math.random() * -35;
-      const peak = (Math.random() * 0.25 + 0.08).toFixed(2);
+      const dur1 = Math.random() * 22 + 16;
+      const dur2 = Math.random() * 8 + 5;
+      const delay = Math.random() * -40;
+      const peak = ((Math.random() * 0.3 + 0.1) * (1 - Math.abs(left - 50) / 50 * 0.6)).toFixed(2);
 
       Object.assign(m.style, {
         position: 'absolute', borderRadius: '50%',
-        background: '#d4c8f0',
+        background: '#c8b8f0',
         width: `${size}px`, height: `${size}px`,
         left: `${left}%`, bottom: `${Math.random() * 30 - 15}%`,
-        opacity: '0', filter: 'blur(0.3px)',
-        animation: `moteDrift ${dur1}s linear infinite, moteGlow ${dur2}s ease-in-out infinite`,
+        opacity: '0',
+        animation: `drift ${dur1}s linear infinite, glow ${dur2}s ease-in-out infinite`,
         animationDelay: `${delay}s, ${delay}s`,
         '--peak': peak,
       });
@@ -35,40 +35,29 @@ export default function LightScatter() {
   return (
     <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
       <style>{`
-        @keyframes moteDrift { from { transform: translateY(0); } to { transform: translateY(-115vh); } }
-        @keyframes moteGlow { 0%,100% { opacity: 0; } 15% { opacity: var(--peak,0.2); } 85% { opacity: var(--peak,0.2); } }
+        @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-115vh); } }
+        @keyframes glow { 0%,100% { opacity: 0; } 15% { opacity: var(--peak,0.25); } 85% { opacity: var(--peak,0.25); } }
       `}</style>
 
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'linear-gradient(to bottom, #050208 0%, #020103 40%, #010001 70%, #000 100%)',
+        background: 'linear-gradient(180deg, #030105 0%, #020104 30%, #010002 60%, #000 100%)',
       }} />
 
       <div style={{
-        position: 'absolute', top: '-40vmax', left: '50%',
-        width: '140vmax', height: '120vmax',
+        position: 'absolute', top: '-35vmax', left: '50%',
+        width: '120vmax', height: '100vmax',
         transform: 'translateX(-50%)',
-        background: 'radial-gradient(ellipse 50% 30% at 50% 0%, rgba(210,200,245,0.20) 0%, rgba(160,145,220,0.10) 35%, rgba(120,100,190,0.04) 55%, transparent 72%)',
-        filter: 'blur(55px)', mixBlendMode: 'screen',
-        animation: 'breathe 12s ease-in-out infinite',
+        background: 'radial-gradient(ellipse 45% 28% at 50% 0%, rgba(140,100,230,0.25) 0%, rgba(110,70,200,0.12) 30%, rgba(80,50,160,0.05) 55%, transparent 75%)',
+        filter: 'blur(50px)',
+        mixBlendMode: 'screen',
       }} />
-      <style>{`@keyframes breathe { 0%,100% { opacity: 0.8; } 50% { opacity: 1; } }`}</style>
 
-      <div className="motes" ref={moteRef} style={{ position: 'absolute', inset: 0 }} />
-
-      <svg style={{
-        position: 'absolute', inset: '-50%', width: '200%', height: '200%',
-        opacity: 0.04, mixBlendMode: 'overlay', pointerEvents: 'none',
-      }}>
-        <filter id="nf">
-          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#nf)" />
-      </svg>
+      <div ref={moteRef} style={{ position: 'absolute', inset: 0 }} />
 
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 65% 70% at 50% 5%, transparent 15%, rgba(0,0,0,0.5) 55%, #000 100%)',
+        background: 'radial-gradient(ellipse 60% 65% at 50% 5%, transparent 10%, rgba(0,0,0,0.45) 50%, #000 100%)',
         pointerEvents: 'none',
       }} />
     </div>
