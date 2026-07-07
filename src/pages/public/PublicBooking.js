@@ -586,7 +586,7 @@ const PublicBooking = () => {
         </div>
 
         {/* Mode toggle */}
-        <div className="flex mb-8 rounded-xl p-1" style={{
+        <div className="flex mb-20 rounded-xl p-1" style={{
           background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
           maxWidth: 400, margin: '0 auto',
         }}>
