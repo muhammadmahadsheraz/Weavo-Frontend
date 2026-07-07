@@ -36,8 +36,6 @@ export default function Browse() {
     !search || b.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const carouselBiz = businesses[carouselIdx];
-
   return (
     <div className="min-h-screen" style={{ background: 'transparent' }}>
       <HelixBackground />
@@ -92,43 +90,49 @@ export default function Browse() {
           </div>
 
           {/* Right: carousel */}
-          {carouselBiz && (
+          {businesses.length > 0 && (
             <div style={{ flex: '0 0 320px', minHeight: 200 }}>
               <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16 }}>
-                <Link to={`/book/${carouselBiz.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-                  <div className="glass" style={{
-                    padding: 24,
-                    animation: 'carouselIn 0.45s ease',
-                  }}>
-                    <div style={{
-                      width: 44, height: 44, borderRadius: 14,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.12))',
-                      marginBottom: 14,
-                    }}>
-                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                      </svg>
-                    </div>
-                    <h3 style={{ color: '#fff', fontWeight: 600, fontSize: 16, margin: '0 0 4px' }}>
-                      {carouselBiz.name}
-                    </h3>
-                    {carouselBiz.description && (
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-                        {carouselBiz.description}
-                      </p>
-                    )}
-                    <div style={{
-                      marginTop: 14, display: 'flex', alignItems: 'center', gap: 6,
-                      fontSize: 11, color: '#a78bfa', fontWeight: 600,
-                    }}>
-                      Book now
-                      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
-                      </svg>
-                    </div>
-                  </div>
-                </Link>
+                <div style={{
+                  display: 'flex',
+                  transform: `translateX(-${carouselIdx * 100}%)`,
+                  transition: 'transform 0.5s cubic-bezier(0.65, 0, 0.35, 1)',
+                }}>
+                  {businesses.map(b => (
+                    <Link key={b._id} to={`/book/${b.slug}`}
+                          style={{ textDecoration: 'none', display: 'block', minWidth: '100%' }}>
+                      <div className="glass" style={{ padding: 24 }}>
+                        <div style={{
+                          width: 44, height: 44, borderRadius: 14,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.12))',
+                          marginBottom: 14,
+                        }}>
+                          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                          </svg>
+                        </div>
+                        <h3 style={{ color: '#fff', fontWeight: 600, fontSize: 16, margin: '0 0 4px' }}>
+                          {b.name}
+                        </h3>
+                        {b.description && (
+                          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 1.5, margin: 0 }}>
+                            {b.description}
+                          </p>
+                        )}
+                        <div style={{
+                          marginTop: 14, display: 'flex', alignItems: 'center', gap: 6,
+                          fontSize: 11, color: '#a78bfa', fontWeight: 600,
+                        }}>
+                          Book now
+                          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+                          </svg>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
 
                 {/* Dots */}
                 {businesses.length > 1 && (
@@ -212,12 +216,7 @@ export default function Browse() {
         )}
       </div>
 
-      <style>{`
-        @keyframes carouselIn {
-          from { opacity: 0; transform: translateX(20px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-      `}</style>
+
     </div>
   );
 }
