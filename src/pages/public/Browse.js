@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/api';
 import Logo from '../../components/Logo';
+import LightScatter from '../../components/LightScatter';
 
 export default function Browse() {
   const [businesses, setBusinesses] = useState([]);
@@ -27,13 +28,7 @@ export default function Browse() {
 
   return (
     <div className="min-h-screen" style={{ background: '#000' }}>
-      {/* Animated radial glow */}
-      <div style={{
-        position: 'fixed', inset: '-120px', pointerEvents: 'none', zIndex: 0,
-        background: 'radial-gradient(ellipse 700px 500px at 50% 200px, rgba(124,58,237,0.15), transparent)',
-        animation: 'glowDrift 8s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate',
-      }} />
-      <style>{`@keyframes glowDrift { from { transform: translateX(-60px); } to { transform: translateX(60px); } }`}</style>
+      <LightScatter />
 
       <nav style={{
         position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center',
