@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../api/api';
-import WeavoThreads from '../../components/WeavoThreads';
+import HelixBackground from '../../components/HelixBackground';
 import ChatWidget from '../../components/ChatWidget';
 import Logo from '../../components/Logo';
 
@@ -85,7 +85,6 @@ const ManageBooking = ({ slug, onBack }) => {
       const { data } = await api.post('/public/verify-otp', { email, code: otpCode });
       setToken(data.token);
       setOtpErr('');
-      // Now fetch appointments
       setLoading(true);
       try {
         const res = await api.get(`/public/book/${slug}/lookup`, {
@@ -427,7 +426,7 @@ const PublicBooking = () => {
 
   if (notFound) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#000' }}>
-      <WeavoThreads />
+      <HelixBackground />
       <div className="glass p-10 text-center max-w-sm w-full mx-4" style={{ position: 'relative', zIndex: 10 }}>
         <p className="text-lg font-bold text-white mb-2">Business not found</p>
         <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>This booking link doesn't exist or has been disabled.</p>
@@ -443,8 +442,8 @@ const PublicBooking = () => {
 
   if (done) return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#000' }}>
-      <WeavoThreads />
-      <div className="glass p-10 text-center max-w-md w-full" style={{ position: 'relative', zIndex: 10, backdropFilter: 'blur(48px)', background: 'rgba(12,8,24,0.12)' }}>
+      <HelixBackground />
+      <div className="glass p-10 text-center max-w-md w-full" style={{ position: 'relative', zIndex: 10 }}>
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
              style={{ background: 'rgba(34,197,94,0.15)' }}>
           <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="#4ade80" strokeWidth={2}>
@@ -466,18 +465,23 @@ const PublicBooking = () => {
 
   return (
     <div className="min-h-screen px-4 py-10 flex flex-col items-center" style={{ background: '#000' }}>
-      <WeavoThreads />
+      <HelixBackground />
       <div className="w-full max-w-lg" style={{ position: 'relative', zIndex: 10 }}>
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="mb-4">
-            <Logo iconSize={28} fontSize={14} />
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.15)',
+            borderRadius: 20, padding: '4px 14px', marginBottom: 16,
+            fontSize: 11, color: '#a78bfa', fontWeight: 600, letterSpacing: '0.03em',
+          }}>
+            Book an Appointment
           </div>
-          <h1 className="text-2xl font-bold text-white">{biz.name}</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">{biz.name}</h1>
           {biz.address?.city && (
-            <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              {biz.address.city}, {biz.address.state}
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              {biz.address.city}{biz.address.state ? `, ${biz.address.state}` : ''}
             </p>
           )}
         </div>
@@ -527,7 +531,7 @@ const PublicBooking = () => {
             </div>
 
             {/* Card */}
-            <div className="glass p-7" style={{ backdropFilter: 'blur(48px)', background: 'rgba(12,8,24,0.12)' }}>
+            <div className="glass p-7" style={{ animation: 'fadeUp 0.3s ease' }}>
 
               {/* Step 0 — Service */}
               {step === 0 && (
@@ -538,7 +542,7 @@ const PublicBooking = () => {
                     <button key={svc._id} onClick={() => { set('serviceId', svc._id); clearErr('serviceId'); }}
                             className="w-full text-left p-4 rounded-xl transition-all"
                             style={{
-                              background: form.serviceId === svc._id ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.04)',
+                              background: form.serviceId === svc._id ? 'rgba(124,58,237,0.18)' : 'rgba(255,255,255,0.03)',
                               border: `1px solid ${form.serviceId === svc._id ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.07)'}`,
                             }}>
                       <div className="flex justify-between items-start">
@@ -674,13 +678,17 @@ const PublicBooking = () => {
         )}
 
         {mode === 'manage' && (
-          <div className="glass p-7" style={{ backdropFilter: 'blur(48px)', background: 'rgba(12,8,24,0.12)' }}>
+          <div className="glass p-7">
             <ManageBooking slug={slug} onBack={() => setMode('book')} />
           </div>
         )}
 
       </div>
       <ChatWidget slug={slug} businessName={biz.name} services={services} onManageBooking={() => setMode('manage')} />
+
+      <style>{`
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </div>
   );
 };
