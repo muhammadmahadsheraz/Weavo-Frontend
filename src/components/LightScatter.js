@@ -39,9 +39,9 @@ export default function LightScatter() {
     const particles = Array.from({ length: PARTICLE_COUNT }, () => ({
       x: Math.random(),
       y: Math.random(),
-      size: 1.5 + Math.random() * 3,
-      speed: 0.0015 + Math.random() * 0.004,
-      drift: -0.004 + Math.random() * 0.008,
+      size: 1 + Math.random() * 2.5,
+      speed: 0.002 + Math.random() * 0.005,
+      drift: -0.003 + Math.random() * 0.006,
     }));
 
     let time = 0;
@@ -51,7 +51,6 @@ export default function LightScatter() {
     const draw = () => {
       time += 1 / 60;
       ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter';
 
       // ── Draw rays ──
       for (const ray of rays) {
@@ -59,7 +58,7 @@ export default function LightScatter() {
         const cosA = Math.cos(angle);
         const sinA = Math.sin(angle);
 
-        const steps = 80;
+        const steps = 60;
         for (let s = 0; s < steps; s++) {
           const t = s / steps;
           const dist = t * Math.hypot(W, H) * 1.5;
@@ -68,20 +67,18 @@ export default function LightScatter() {
 
           const halfAng = ray.halfWidth * (1 + t * 1.2);
           const span = dist * Math.tan(halfAng);
-          const brightness = ray.brightness * (1 - t * 0.4) * 0.30;
+          const brightness = ray.brightness * (1 - t * 0.6) * 0.035;
 
-          const grad = ctx.createRadialGradient(px, py, 0, px, py, Math.max(span * 2, 8));
-          grad.addColorStop(0, `rgba(225,212,255,${brightness})`);
-          grad.addColorStop(0.5, `rgba(200,185,255,${brightness * 0.5})`);
-          grad.addColorStop(1, 'rgba(180,160,240,0)');
+          const grad = ctx.createRadialGradient(px, py, 0, px, py, Math.max(span, 4));
+          grad.addColorStop(0, `rgba(200,185,255,${brightness})`);
+          grad.addColorStop(0.5, `rgba(200,185,255,${brightness * 0.4})`);
+          grad.addColorStop(1, 'rgba(200,185,255,0)');
           ctx.fillStyle = grad;
           ctx.beginPath();
           ctx.ellipse(px, py, Math.max(span * 1.5, 2), Math.max(span, 2), angle + HALF_PI, 0, PI * 2);
           ctx.fill();
         }
       }
-
-      ctx.globalCompositeOperation = 'source-over';
 
       // ── Draw particles ──
       for (const p of particles) {
@@ -131,31 +128,31 @@ export default function LightScatter() {
           // White core
           ctx.beginPath();
           ctx.arc(px, py, size * 0.4, 0, PI * 2);
-          ctx.fillStyle = `rgba(255,255,255,${Math.min(brightness * 0.85, 0.75)})`;
+          ctx.fillStyle = `rgba(255,255,255,${Math.min(brightness * 0.9, 0.7)})`;
           ctx.fill();
 
           // Lavender inner glow
           ctx.beginPath();
           ctx.arc(px, py, size * 0.8, 0, PI * 2);
-          ctx.fillStyle = `rgba(230,220,255,${Math.min(glow, 0.5)})`;
+          ctx.fillStyle = `rgba(220,210,255,${Math.min(glow * 0.45, 0.35)})`;
           ctx.fill();
 
           // Outer bloom
           ctx.beginPath();
-          ctx.arc(px, py, size * 3, 0, PI * 2);
-          ctx.fillStyle = `rgba(210,195,250,${Math.min(glow * 0.3, 0.2)})`;
+          ctx.arc(px, py, size * 2.5, 0, PI * 2);
+          ctx.fillStyle = `rgba(200,185,255,${Math.min(glow * 0.12, 0.10)})`;
           ctx.fill();
 
           // Soft haze
           ctx.beginPath();
-          ctx.arc(px, py, size * 6, 0, PI * 2);
-          ctx.fillStyle = `rgba(220,210,255,${Math.min(glow * 0.12, 0.08)})`;
+          ctx.arc(px, py, size * 5, 0, PI * 2);
+          ctx.fillStyle = `rgba(210,200,250,${Math.min(glow * 0.05, 0.04)})`;
           ctx.fill();
         } else {
           // barely visible when outside beams
           ctx.beginPath();
-          ctx.arc(px, py, p.size * 0.4, 0, PI * 2);
-          ctx.fillStyle = 'rgba(200,185,240,0.06)';
+          ctx.arc(px, py, p.size * 0.3, 0, PI * 2);
+          ctx.fillStyle = 'rgba(210,200,250,0.025)';
           ctx.fill();
         }
       }
@@ -189,7 +186,7 @@ export default function LightScatter() {
         position: 'absolute', top: '-34vmax', left: '50%',
         width: '130vmax', height: '110vmax',
         transform: 'translateX(-50%)',
-        background: 'radial-gradient(ellipse 46% 32% at 50% 0%, rgba(220,210,250,0.40) 0%, rgba(190,175,245,0.20) 28%, rgba(150,135,220,0.08) 50%, transparent 72%)',
+        background: 'radial-gradient(ellipse 46% 32% at 50% 0%, rgba(210,195,250,0.28) 0%, rgba(180,160,240,0.12) 28%, rgba(140,120,210,0.05) 50%, transparent 72%)',
         filter: 'blur(42px)', mixBlendMode: 'screen',
         animation: 'ambientBreathe 10s ease-in-out infinite',
       }} />
