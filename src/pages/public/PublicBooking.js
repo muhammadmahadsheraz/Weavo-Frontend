@@ -505,11 +505,16 @@ const PublicBooking = () => {
               lineHeight: 0.9,
               letterSpacing: '-0.04em',
               margin: 0,
-              background: 'linear-gradient(135deg, #a78bfa, #06B6D4)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: '#fff',
             }}>
-              Book an Appointment
+              Book{' '}
+              <span style={{
+                background: 'linear-gradient(135deg, #a78bfa, #06B6D4)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                an Appointment
+              </span>
             </h1>
             <p style={{
               marginTop: 20, fontSize: 14, lineHeight: 1.6,
