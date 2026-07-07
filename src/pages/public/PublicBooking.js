@@ -193,7 +193,7 @@ const ManageBooking = ({ slug, onBack }) => {
           ) : rescheduleSlots.length === 0 ? (
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No available slots on this date.</p>
           ) : (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-y-3 gap-x-2">
               {rescheduleSlots.map(slot => (
                 <button key={slot} onClick={() => setRescheduleTime(slot)}
                         className="py-2 rounded-lg text-sm font-medium transition-all"
@@ -712,7 +712,7 @@ const PublicBooking = () => {
                         <p className="text-sm py-4" style={{ color: 'rgba(255,255,255,0.4)' }}>No available slots on this date.</p>
                       ) : (
                         <div>
-                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-y-4 gap-x-2.5">
                             {slots.map(slot => (
                               <button key={slot} onClick={() => { set('startTime', slot); clearErr('startTime'); }}
                                       className="py-2.5 rounded-xl text-sm font-medium transition-all"
