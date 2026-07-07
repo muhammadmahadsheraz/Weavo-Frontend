@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../api/api';
+import Logo from '../../components/Logo';
 import HelixBackground from '../../components/HelixBackground';
 import ChatWidget from '../../components/ChatWidget';
 
@@ -286,13 +287,13 @@ const ManageBooking = ({ slug, onBack }) => {
             </div>
           )}
 
-          <button onClick={onBack} className="btn-ghost mt-3 text-xs">← Back to booking</button>
+          <button onClick={onBack} className="btn-ghost mt-3 text-xs">← Back</button>
         </div>
       ) : lookedUp && appointments.length === 0 ? (
         <div className="text-center py-4">
           <p className="text-sm text-white mb-1">No upcoming appointments found</p>
           <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Bookings with this email will appear here.</p>
-          <button onClick={onBack} className="btn-ghost mt-3 text-xs">← Back to booking</button>
+          <button onClick={onBack} className="btn-ghost mt-3 text-xs">← Back</button>
         </div>
       ) : lookedUp ? (
         <div className="space-y-3">
@@ -337,7 +338,7 @@ const ManageBooking = ({ slug, onBack }) => {
               </div>
             </div>
           ))}
-          <button onClick={onBack} className="btn-ghost text-xs mt-1">← Back to booking</button>
+          <button onClick={onBack} className="btn-ghost text-xs mt-1">← Back</button>
         </div>
       ) : loading ? (
         <div className="flex items-center justify-center py-8">
@@ -350,15 +351,17 @@ const ManageBooking = ({ slug, onBack }) => {
 
 const PublicBooking = () => {
   const { slug } = useParams();
-  const [biz, setBiz]         = useState(null);
+  const [biz, setBiz]           = useState(null);
   const [services, setServices] = useState([]);
   const [notFound, setNotFound] = useState(false);
-  const [step, setStep]       = useState(0);
-  const [slots, setSlots]     = useState([]);
+  const [step, setStep]         = useState(0);
+  const [slots, setSlots]       = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [done, setDone]       = useState(false);
-  const [mode, setMode]       = useState('book');
+  const [submitting, setSubmitting]     = useState(false);
+  const [done, setDone]         = useState(false);
+  const [mode, setMode]         = useState('book');
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const timerRef = useRef(null);
 
   const [form, setForm] = useState({
     serviceId: '',
@@ -401,6 +404,14 @@ const PublicBooking = () => {
   }, [slug]);
 
   useEffect(() => {
+    if (services.length < 2) return;
+    timerRef.current = setInterval(() => {
+      setCarouselIdx(prev => (prev + 1) % services.length);
+    }, 3500);
+    return () => clearInterval(timerRef.current);
+  }, [services.length]);
+
+  useEffect(() => {
     if (form.date && form.serviceId) {
       setSlotsLoading(true);
       api.get(`/public/book/${slug}/slots`, { params: { date: form.date, serviceId: form.serviceId } })
@@ -424,7 +435,7 @@ const PublicBooking = () => {
   };
 
   if (notFound) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#000' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
       <HelixBackground />
       <div className="glass p-10 text-center max-w-sm w-full mx-4" style={{ position: 'relative', zIndex: 10 }}>
         <p className="text-lg font-bold text-white mb-2">Business not found</p>
@@ -434,13 +445,13 @@ const PublicBooking = () => {
   );
 
   if (!biz) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#000' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'transparent' }}>
       <div className="spinner"/>
     </div>
   );
 
   if (done) return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#000' }}>
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'transparent' }}>
       <HelixBackground />
       <div className="glass p-10 text-center max-w-md w-full" style={{ position: 'relative', zIndex: 10 }}>
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
@@ -451,7 +462,7 @@ const PublicBooking = () => {
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Booking request submitted!</h2>
         <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Your appointment at <strong className="text-white">{biz.name}</strong> is pending confirmation from the business.
+          Your appointment at <strong className="text-white">{biz.name}</strong> is pending confirmation.
         </p>
         <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
           You'll receive an email once it's confirmed.
@@ -463,35 +474,123 @@ const PublicBooking = () => {
   );
 
   return (
-    <div className="min-h-screen px-4 py-10 flex flex-col items-center" style={{ background: '#000' }}>
+    <div className="min-h-screen" style={{ background: 'transparent' }}>
       <HelixBackground />
 
-      <div className="w-full max-w-2xl" style={{ position: 'relative', zIndex: 10 }}>
+      <nav style={{
+        position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between', padding: '14px 24px',
+      }}>
+        <Logo iconSize={24} fontSize={12} />
+        <div className="flex items-center gap-2.5">
+          <Link to="/login" className="btn-ghost" style={{ padding: '6px 14px', fontSize: 12 }}>
+            Business Login
+          </Link>
+          <Link to="/register" className="btn-primary" style={{ padding: '6px 14px', fontSize: 12 }}>
+            Sign Up
+          </Link>
+        </div>
+      </nav>
 
-        {/* ── Header ── */}
-        <div className="text-center mb-10">
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: 'linear-gradient(135deg, rgba(124,58,237,0.12), rgba(6,182,212,0.08))',
-            border: '1px solid rgba(124,58,237,0.15)',
-            borderRadius: 20, padding: '5px 16px', marginBottom: 20,
-            fontSize: 11, color: '#a78bfa', fontWeight: 600, letterSpacing: '0.03em',
-          }}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            Book an Appointment
-          </div>
-          <h1 className="text-4xl font-bold text-white mb-3">{biz.name}</h1>
-          {biz.address?.city && (
-            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>
-              {biz.address.city}{biz.address.state ? `, ${biz.address.state}` : ''}
+      <div className="relative max-w-6xl mx-auto px-4 pt-10 pb-20" style={{ zIndex: 10 }}>
+        {/* Hero: title left, carousel right */}
+        <div style={{
+          display: 'flex', alignItems: 'flex-end', gap: 48,
+          marginBottom: 48, flexWrap: 'wrap',
+        }}>
+          <div style={{ flex: '1 1 280px' }}>
+            <h1 style={{
+              fontSize: 'clamp(3.5rem, 10vw, 7rem)',
+              fontWeight: 800,
+              lineHeight: 0.9,
+              letterSpacing: '-0.04em',
+              color: '#fff',
+              margin: 0,
+            }}>
+              Book
+              <br />
+              <span style={{
+                background: 'linear-gradient(135deg, #a78bfa, #06B6D4)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                an Appointment
+              </span>
+            </h1>
+            <p style={{
+              marginTop: 20, fontSize: 14, lineHeight: 1.6,
+              color: 'rgba(255,255,255,0.35)', maxWidth: 320,
+            }}>
+              {biz.name} — pick a service, choose a time, and book instantly.
             </p>
+          </div>
+
+          {/* Carousel: services */}
+          {services.length > 0 && (
+            <div style={{ flex: '0 0 320px', minHeight: 200 }}>
+              <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16 }}>
+                <div style={{
+                  display: 'flex',
+                  transform: `translateX(-${carouselIdx * 100}%)`,
+                  transition: 'transform 0.5s cubic-bezier(0.65, 0, 0.35, 1)',
+                }}>
+                  {services.map(svc => (
+                    <div key={svc._id}
+                         style={{ textDecoration: 'none', display: 'block', minWidth: '100%' }}>
+                      <div className="glass" style={{ padding: 24 }}>
+                        <div style={{
+                          width: 44, height: 44, borderRadius: 14,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.12))',
+                          marginBottom: 14,
+                        }}>
+                          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                          </svg>
+                        </div>
+                        <h3 style={{ color: '#fff', fontWeight: 600, fontSize: 16, margin: '0 0 4px' }}>
+                          {svc.name}
+                        </h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                          <span style={{ fontSize: 15, fontWeight: 700, color: '#a78bfa' }}>${svc.price}</span>
+                          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{svc.duration} min</span>
+                        </div>
+                        {svc.description && (
+                          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 1.5, marginTop: 8 }}>
+                            {svc.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {services.length > 1 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 12 }}>
+                    {services.slice(0, 5).map((_, i) => (
+                      <button key={i} onClick={() => setCarouselIdx(i)}
+                              style={{
+                                width: 6, height: 6, borderRadius: '50%', border: 'none',
+                                cursor: 'pointer', padding: 0,
+                                background: i === carouselIdx ? '#a78bfa' : 'rgba(255,255,255,0.12)',
+                                transition: 'background 0.2s',
+                              }} />
+                    ))}
+                    {services.length > 5 && (
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginLeft: 2 }}>+{services.length - 5}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
-        {/* ── Mode Toggle ── */}
-        <div className="flex mb-8 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        {/* Mode toggle */}
+        <div className="flex mb-8 rounded-xl p-1" style={{
+          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+          maxWidth: 400,
+        }}>
           <button onClick={() => { setMode('book'); setStep(0); }}
                   className="flex-1 py-2.5 text-sm font-medium rounded-lg transition-all"
                   style={{
@@ -511,8 +610,8 @@ const PublicBooking = () => {
         </div>
 
         {mode === 'book' && (
-          <>
-            {/* ── Step Indicator ── */}
+          <div className="max-w-2xl">
+            {/* Step indicator */}
             <div className="flex items-center justify-between mb-10 px-2">
               {STEPS.map((s, i) => (
                 <React.Fragment key={s}>
@@ -546,16 +645,13 @@ const PublicBooking = () => {
               ))}
             </div>
 
-            {/* ── Form Card ── */}
+            {/* Form card */}
             <div className="glass p-8" style={{ borderRadius: 20, animation: 'fadeUp 0.35s ease' }}>
-
               {/* Step 0 — Service */}
               {step === 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-5">Choose a service</h3>
-                  {errors.serviceId && (
-                    <p className="text-xs mb-3" style={{ color: '#f87171' }}>{errors.serviceId}</p>
-                  )}
+                  {errors.serviceId && <p className="text-xs mb-3" style={{ color: '#f87171' }}>{errors.serviceId}</p>}
                   <div className="space-y-3">
                     {services.map((svc, idx) => (
                       <button key={svc._id} onClick={() => { set('serviceId', svc._id); clearErr('serviceId'); }}
@@ -572,8 +668,7 @@ const PublicBooking = () => {
                             <div style={{
                               width: 40, height: 40, borderRadius: 12,
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              background: form.serviceId === svc._id
-                                ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)',
+                              background: form.serviceId === svc._id ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)',
                               flexShrink: 0,
                             }}>
                               <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" strokeWidth={1.5}>
@@ -582,9 +677,7 @@ const PublicBooking = () => {
                             </div>
                             <div>
                               <p className="text-sm font-semibold text-white">{svc.name}</p>
-                              {svc.description && (
-                                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{svc.description}</p>
-                              )}
+                              {svc.description && <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{svc.description}</p>}
                             </div>
                           </div>
                           <div className="text-right ml-4 flex-shrink-0">
@@ -698,7 +791,7 @@ const PublicBooking = () => {
                       <div>
                         <p className="text-sm font-semibold text-white">{selectedService.name}</p>
                         <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                          {selectedService.duration} min · ${selectedService.price}
+                          {selectedService.duration} min &middot; ${selectedService.price}
                         </p>
                       </div>
                     </div>
@@ -710,7 +803,7 @@ const PublicBooking = () => {
                       { label: 'Time', value: form.startTime },
                       { label: 'Name', value: form.client.name },
                       { label: 'Email', value: form.client.email },
-                      { label: 'Phone', value: form.client.phone || '—' },
+                      { label: 'Phone', value: form.client.phone || '\u2014' },
                     ].map(r => (
                       <div key={r.label} className="flex justify-between items-center py-2"
                            style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
@@ -728,9 +821,7 @@ const PublicBooking = () => {
                   <button onClick={() => setStep(s => s - 1)} className="btn-ghost flex-1">Back</button>
                 )}
                 {step < 3 ? (
-                  <button onClick={handleNext} className="btn-primary flex-1">
-                    Continue
-                  </button>
+                  <button onClick={handleNext} className="btn-primary flex-1">Continue</button>
                 ) : (
                   <button onClick={handleSubmit} disabled={submitting} className="btn-primary flex-1">
                     {submitting ? 'Confirming...' : 'Confirm Booking'}
@@ -738,15 +829,14 @@ const PublicBooking = () => {
                 )}
               </div>
             </div>
-          </>
-        )}
-
-        {mode === 'manage' && (
-          <div className="glass p-8" style={{ borderRadius: 20 }}>
-            <ManageBooking slug={slug} onBack={() => setMode('book')} />
           </div>
         )}
 
+        {mode === 'manage' && (
+          <div className="glass p-8" style={{ borderRadius: 20, maxWidth: 480 }}>
+            <ManageBooking slug={slug} onBack={() => setMode('book')} />
+          </div>
+        )}
       </div>
 
       <ChatWidget slug={slug} businessName={biz.name} services={services} onManageBooking={() => setMode('manage')} />
