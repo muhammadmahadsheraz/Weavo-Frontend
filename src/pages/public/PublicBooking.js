@@ -586,9 +586,9 @@ const PublicBooking = () => {
         </div>
 
         {/* Mode toggle */}
-        <div className="flex mb-20 rounded-xl p-1" style={{
+        <div className="flex mb-20 rounded-xl p-1 mx-auto" style={{
           background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
-          maxWidth: 400, margin: '0 auto',
+          maxWidth: 400,
         }}>
           <button onClick={() => { setMode('book'); setStep(0); }}
                   className="flex-1 py-2.5 text-sm font-medium rounded-lg transition-all"
