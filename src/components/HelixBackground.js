@@ -204,6 +204,7 @@ export default function HelixBackground() {
         zIndex: -1,
         pointerEvents: 'none',
         opacity: 1,
+        filter: 'blur(5px)',
       }}
     />
   );
