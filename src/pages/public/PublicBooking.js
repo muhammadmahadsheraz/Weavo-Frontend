@@ -17,13 +17,15 @@ const CalendarIcon = () => (
 );
 
 const DateInput = ({ value, onChange, min, error }) => (
-  <div className="relative">
-    <input type="date" value={value} onChange={onChange} min={min}
-           className="input-dark w-full" style={{ paddingRight: 36 }} />
-    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-          style={{ color: 'rgba(255,255,255,0.35)' }}>
-      <CalendarIcon />
-    </span>
+  <div>
+    <label className="relative block cursor-pointer">
+      <input type="date" value={value} onChange={onChange} min={min}
+             className="input-dark w-full" style={{ paddingRight: 36 }} />
+      <span className="absolute right-3 top-1/2 -translate-y-1/2"
+            style={{ color: 'rgba(255,255,255,0.35)', lineHeight: 0 }}>
+        <CalendarIcon />
+      </span>
+    </label>
     {error && <p className="text-xs mt-1" style={{ color: '#f87171' }}>{error}</p>}
   </div>
 );
