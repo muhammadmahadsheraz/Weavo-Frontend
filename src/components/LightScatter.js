@@ -48,7 +48,7 @@ export default function LightScatter() {
         position: 'absolute', top: '-35vmax', left: '50%',
         width: '120vmax', height: '100vmax',
         transform: 'translateX(-50%)',
-        background: 'radial-gradient(ellipse 45% 28% at 50% 0%, rgba(140,100,230,0.25) 0%, rgba(110,70,200,0.12) 30%, rgba(80,50,160,0.05) 55%, transparent 75%)',
+        background: 'radial-gradient(ellipse 45% 28% at 50% 0%, rgba(160,120,255,0.6) 0%, rgba(130,90,240,0.35) 20%, rgba(100,60,200,0.15) 40%, rgba(80,50,160,0.06) 60%, transparent 78%)',
         filter: 'blur(50px)',
         mixBlendMode: 'screen',
       }} />
