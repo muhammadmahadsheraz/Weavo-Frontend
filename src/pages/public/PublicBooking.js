@@ -8,6 +8,28 @@ import Logo from '../../components/Logo';
 
 const STEPS = ['Service', 'Date & Time', 'Your Details', 'Confirm'];
 
+const CalendarIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+);
+
+const DateInput = ({ value, onChange, min, error }) => (
+  <div className="relative">
+    <input type="date" value={value} onChange={onChange} min={min}
+           className="input-dark w-full" style={{ paddingRight: 36 }} />
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ color: 'rgba(255,255,255,0.35)' }}>
+      <CalendarIcon />
+    </span>
+    {error && <p className="text-xs mt-1" style={{ color: '#f87171' }}>{error}</p>}
+  </div>
+);
+
+const ErrMsg = ({ msg }) => msg ? <p className="text-xs mt-1" style={{ color: '#f87171' }}>{msg}</p> : null;
+
 const ManageBooking = ({ slug, onBack }) => {
   const [email, setEmail] = useState('');
   const [appointments, setAppointments] = useState([]);
@@ -21,9 +43,18 @@ const ManageBooking = ({ slug, onBack }) => {
   const [rescheduleSlots, setRescheduleSlots] = useState([]);
   const [rescheduleSlotsLoading, setRescheduleSlotsLoading] = useState(false);
   const [resolved, setResolved] = useState(false);
+  const [emailErr, setEmailErr] = useState('');
+
+  const validateEmail = (val) => {
+    if (!val.trim()) return 'Email is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return 'Enter a valid email address';
+    return '';
+  };
 
   const handleLookup = async () => {
-    if (!email) return;
+    const err = validateEmail(email);
+    setEmailErr(err);
+    if (err) return;
     setLoading(true);
     setLookedUp(false);
     try {
@@ -105,12 +136,12 @@ const ManageBooking = ({ slug, onBack }) => {
 
   if (action === 'reschedule' && actionApt) return (
     <div className="space-y-5">
-      <h3 className="text-base font-semibold text-white">Reschedule</h3>
+        <h3 className="text-base font-semibold text-white">Reschedule</h3>
       <div>
         <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>New Date</label>
-        <input type="date" value={rescheduleDate}
-               onChange={e => { setRescheduleDate(e.target.value); setRescheduleTime(''); }}
-               min={new Date().toISOString().split('T')[0]} className="input-dark" />
+        <DateInput value={rescheduleDate}
+                   onChange={e => { setRescheduleDate(e.target.value); setRescheduleTime(''); }}
+                   min={new Date().toISOString().split('T')[0]} />
       </div>
       {rescheduleDate && (
         <div>
@@ -173,15 +204,20 @@ const ManageBooking = ({ slug, onBack }) => {
           <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>
             Enter the email you used when booking to see your appointments.
           </p>
-          <div className="flex gap-2">
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                   placeholder="you@email.com"
-                   onKeyDown={e => e.key === 'Enter' && handleLookup()}
-                   className="input-dark flex-1" />
-            <button onClick={handleLookup} disabled={!email || loading}
-                    className="btn-primary" style={{ padding: '9px 18px', fontSize: 13 }}>
-              {loading ? '...' : 'Look up'}
-            </button>
+          <div>
+            <div className="flex gap-2">
+              <input type="email" value={email} onChange={e => { setEmail(e.target.value); setEmailErr(''); }}
+                     placeholder="you@email.com"
+                     onBlur={() => setEmailErr(validateEmail(email))}
+                     onKeyDown={e => e.key === 'Enter' && handleLookup()}
+                     className="input-dark flex-1"
+                     style={emailErr ? { borderColor: '#f87171' } : {}} />
+              <button onClick={handleLookup} disabled={!email || loading}
+                      className="btn-primary" style={{ padding: '9px 18px', fontSize: 13 }}>
+                {loading ? '...' : 'Look up'}
+              </button>
+            </div>
+            <ErrMsg msg={emailErr} />
           </div>
           <button onClick={onBack} className="btn-ghost mt-3 text-xs">← Back to booking</button>
         </div>
@@ -260,6 +296,30 @@ const PublicBooking = () => {
     client: { name: '', email: '', phone: '' },
     notes: '',
   });
+  const [errors, setErrors] = useState({});
+
+  const setErr = (field, msg) => setErrors(p => ({ ...p, [field]: msg }));
+  const clearErr = (field) => setErrors(p => ({ ...p, [field]: '' }));
+
+  const validateStep = (s) => {
+    const e = {};
+    if (s === 0 && !form.serviceId) e.serviceId = 'Please select a service';
+    if (s === 1) {
+      if (!form.date) e.date = 'Please select a date';
+      if (!form.startTime) e.startTime = 'Please select a time';
+    }
+    if (s === 2) {
+      if (!form.client.name.trim()) e.name = 'Name is required';
+      if (!form.client.email.trim()) e.email = 'Email is required';
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.client.email)) e.email = 'Enter a valid email address';
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) setStep(s => s + 1);
+  };
 
   const selectedService = services.find(s => s._id === form.serviceId);
 
@@ -400,8 +460,9 @@ const PublicBooking = () => {
               {step === 0 && (
                 <div className="space-y-3">
                   <h3 className="text-base font-semibold text-white mb-4">Choose a service</h3>
+                  {errors.serviceId && <p className="text-xs mb-2" style={{ color: '#f87171' }}>{errors.serviceId}</p>}
                   {services.map(svc => (
-                    <button key={svc._id} onClick={() => set('serviceId', svc._id)}
+                    <button key={svc._id} onClick={() => { set('serviceId', svc._id); clearErr('serviceId'); }}
                             className="w-full text-left p-4 rounded-xl transition-all"
                             style={{
                               background: form.serviceId === svc._id ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.04)',
@@ -428,8 +489,10 @@ const PublicBooking = () => {
                   <h3 className="text-base font-semibold text-white">Pick a date & time</h3>
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>Date</label>
-                    <input type="date" value={form.date} onChange={e => { set('date', e.target.value); set('startTime', ''); }}
-                           min={new Date().toISOString().split('T')[0]} className="input-dark" />
+                    <DateInput value={form.date}
+                               onChange={e => { set('date', e.target.value); set('startTime', ''); clearErr('date'); }}
+                               min={new Date().toISOString().split('T')[0]}
+                               error={errors.date} />
                   </div>
                   {form.date && (
                     <div>
@@ -441,18 +504,21 @@ const PublicBooking = () => {
                       ) : slots.length === 0 ? (
                         <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No available slots on this date.</p>
                       ) : (
-                        <div className="grid grid-cols-3 gap-2">
-                          {slots.map(slot => (
-                            <button key={slot} onClick={() => set('startTime', slot)}
-                                    className="py-2 rounded-lg text-sm font-medium transition-all"
-                                    style={{
-                                      background: form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.05)',
-                                      color: form.startTime === slot ? '#fff' : 'rgba(255,255,255,0.6)',
-                                      border: `1px solid ${form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.08)'}`,
-                                    }}>
-                              {slot}
-                            </button>
-                          ))}
+                        <div>
+                          <div className="grid grid-cols-3 gap-2">
+                            {slots.map(slot => (
+                              <button key={slot} onClick={() => { set('startTime', slot); clearErr('startTime'); }}
+                                      className="py-2 rounded-lg text-sm font-medium transition-all"
+                                      style={{
+                                        background: form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.05)',
+                                        color: form.startTime === slot ? '#fff' : 'rgba(255,255,255,0.6)',
+                                        border: `1px solid ${form.startTime === slot ? '#7C3AED' : 'rgba(255,255,255,0.08)'}`,
+                                      }}>
+                                {slot}
+                              </button>
+                            ))}
+                          </div>
+                          <ErrMsg msg={errors.startTime} />
                         </div>
                       )}
                     </div>
@@ -471,8 +537,18 @@ const PublicBooking = () => {
                   ].map(f => (
                     <div key={f.field}>
                       <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>{f.label}</label>
-                      <input type={f.type} value={form.client[f.field]} onChange={e => setClient(f.field, e.target.value)}
-                             required={f.required} placeholder={f.placeholder} className="input-dark" />
+                      <input type={f.type} value={form.client[f.field]}
+                             onChange={e => { setClient(f.field, e.target.value); clearErr(f.field); }}
+                             onBlur={() => {
+                               const val = form.client[f.field];
+                               if (f.required && !val.trim()) setErr(f.field, `${f.label.replace(' *', '')} is required`);
+                               else if (f.field === 'email' && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) setErr(f.field, 'Enter a valid email');
+                               else clearErr(f.field);
+                             }}
+                             required={f.required} placeholder={f.placeholder}
+                             className="input-dark"
+                             style={errors[f.field] ? { borderColor: '#f87171' } : {}} />
+                      <ErrMsg msg={errors[f.field]} />
                     </div>
                   ))}
                   <div>
@@ -511,15 +587,7 @@ const PublicBooking = () => {
                   <button onClick={() => setStep(s => s - 1)} className="btn-ghost flex-1">Back</button>
                 )}
                 {step < 3 ? (
-                  <button
-                    onClick={() => setStep(s => s + 1)}
-                    disabled={
-                      (step === 0 && !form.serviceId) ||
-                      (step === 1 && (!form.date || !form.startTime)) ||
-                      (step === 2 && (!form.client.name || !form.client.email))
-                    }
-                    className="btn-primary flex-1"
-                  >
+                  <button onClick={handleNext} className="btn-primary flex-1">
                     Continue
                   </button>
                 ) : (
