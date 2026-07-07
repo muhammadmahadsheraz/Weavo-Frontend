@@ -7,13 +7,13 @@ export default function LightScatter() {
     const el = moteRef.current;
     if (!el) return;
     const frag = document.createDocumentFragment();
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 350; i++) {
       const m = document.createElement('div');
-      const size = Math.random() * 2 + 0.5;
+      const size = Math.random() * 2.5 + 0.3;
       const left = Math.random() * 100;
-      const dur1 = Math.random() * 22 + 16;
-      const dur2 = Math.random() * 8 + 5;
-      const delay = Math.random() * -40;
+      const dur1 = Math.random() * 25 + 14;
+      const dur2 = Math.random() * 10 + 4;
+      const delay = Math.random() * -50;
       const peak = ((Math.random() * 0.3 + 0.1) * (1 - Math.abs(left - 50) / 50 * 0.6)).toFixed(2);
 
       Object.assign(m.style, {
